@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: brutos_cnes_web_staging
+    database: rj-sms
+    schema: brutos_cnes_web_staging
+    tables:
+    - name: rlEstabProgFundo
+    - name: tbEstabelecimento
+    - name: tbTipoUnidade
+    - name: tbTipoEstabelecimento
+    - name: tbGestao
+    - name: tbTurnoAtendimento
+    - name: tbEquipe
+    - name: tbModVinculo
+    - name: tbTpModVinculo
+    - name: tbDadosProfissionalSus
+    - name: rlEstabEquipeProf
+    - name: tbTipoEquipe
+    - name: tbArea
+    - name: tbNaturezaJuridica
+    - name: tbLeito
+    - name: tbSubGruposHabilitacao
+    - name: tbTipoEquipamento
+    - name: tbEquipamento
+    - name: tbCargaHorariaSus

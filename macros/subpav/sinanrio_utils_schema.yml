@@ -1,0 +1,38 @@
+version: 2
+
+group: "sinanrio"
+
+macros:
+  - name: sinanrio_lista_cids_sintomaticos
+    description: >
+      Retorna a lista de CIDs usados para identificar possíveis sintomáticos respiratórios nos atendimentos registrados no prontuário. 
+      Essa lista é usada para filtrar
+      pacientes com suspeita clínica compatível com tuberculose ou condições respiratórias afins.
+    arguments: []
+
+  - name: sinanrio_padronize_sexo
+    description: |
+      Padroniza sexo para códigos numéricos:
+        • 1 = Masculino
+        • 2 = Feminino
+        • 3 = Ignorado/Indefinido
+      Aceita variações comuns (`'M','F','MASCULINO','FEMININO','1','2','I','IGN','INDEFINIDO'`), insensível a acentos/caixa.
+    arguments:
+      - name: coluna
+        type: string
+        description: "Expressão/coluna de origem (STRING)."
+
+  - name: sinanrio_padronize_raca_cor
+    description: |
+      Padroniza raça/cor para códigos numéricos (SINAN):
+        • 1 = Branca
+        • 2 = Preta
+        • 3 = Parda
+        • 4 = Amarela
+        • 5 = Indígena
+        • 9 = Ignorado
+      Aceita abreviações/variações (ex.: `'BRNCA','PRTO','PA','IND','IDG'`), insensível a acentos/caixa.
+    arguments:
+      - name: coluna
+        type: string
+        description: "Expressão/coluna de origem (STRING)."

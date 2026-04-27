@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: brutos_plataforma_smsrio_staging
+    database: rj-sms
+    schema: brutos_plataforma_smsrio_staging
+    tables:
+      - name: subpav_arboviroses__estoque
+      - name: subpav_arboviroses__itens_estoque
+      - name: subpav_cnes__contatos_equipes
+      - name: subpav_cnes__contatos_unidades
+      - name: subpav_cnes__unidades
+      - name: transparencia__tb_preparos_finais
+      - name: sms_pacientes__tb_pacientes
+        loaded_at_field: "CAST(timestamp AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+      - name: sms_pacientes__tb_pacientes_telefones
+        loaded_at_field: "CAST(timestamp AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+      - name: sms_pacientes__tb_cns_provisorios
+        loaded_at_field: "CAST(timestamp AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}

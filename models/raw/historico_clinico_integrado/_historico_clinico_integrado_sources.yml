@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: brutos_historico_clinico_integrado_staging
+    database: rj-sms
+    schema: brutos_historico_clinico_integrado_staging
+    tables:
+      - name: paciente
+      - name: paciente_cns
+      - name: paciente_endereco
+      - name: paciente_contato
+  - name: intermediario_historico_clinico_staging
+    database: rj-sms-dev
+    schema: intermediario_historico_clinico_staging
+    tables:
+      - name: alergias_vitai_padronizacao

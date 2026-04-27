@@ -1,0 +1,1177 @@
+models:
+  - name: raw_prontuario_vitacare__estoque_posicao
+    description: >
+      Posição diária dos estoques de medicamentos e insumos das unidades de
+      saúde que utilizam o prontuário VitaCare para  gestão de estoque de
+      farmácia e almoxarifado
+    columns:
+      - name: id
+        description: Identificador único do registro vindo do prontuário
+        data_type: string
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__estoque_posicao__id__unique
+              config:
+                where: safe_cast(particao_data_posicao as date) = current_date('America/Sao_Paulo')
+          - not_null:
+              name: raw_prontuario_vitacare__estoque_posicao__id__not_null
+              config:
+                where: safe_cast(particao_data_posicao as date) = current_date('America/Sao_Paulo')
+                severity: warn
+                warn_if: ">1000"
+      - name: id_surrogate
+        description: Chave surrogada composta pelo id do material, lote, localização,
+          quantidade e data de partição
+        data_type: string
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__estoque_posicao__id_surrogate__unique
+              config:
+                where: safe_cast(particao_data_posicao as date) = current_date('America/Sao_Paulo')
+          - not_null:
+              name: raw_prontuario_vitacare__estoque_posicao__id_surrogate__not_null
+              config:
+                where: safe_cast(particao_data_posicao as date) = current_date('America/Sao_Paulo')
+                severity: warn
+                warn_if: ">1000"
+      - name: area_programatica
+        description: Área programática da unidade de saúde onde o item está localizado
+        data_type: string
+      - name: id_cnes
+        description: Número do CNES (Cadastro Nacional de Estabelecimentos de Saúde) da
+          unidade de saúde onde o item está localizado
+        data_type: string
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__estoque_posicao__id_cnes__not_null
+              config:
+                where: safe_cast(particao_data_posicao as date) = current_date('America/Sao_Paulo')
+          - relationships:
+              name: raw_prontuario_vitacare__estoque_posicao__id_cnes__relationship
+              to: ref('dim_estabelecimento')
+              field: id_cnes
+
+      - name: id_lote
+        description: Identificador do lote do medicamento/insumo
+        data_type: string
+      - name: id_material
+        description: Código de identificação do material cadastrado no prontuário
+        data_type: string
+      - name: id_atc
+        description: Código de identificação do material cadastrado no prontuário no
+          padrão ATC
+        data_type: string
+      - name: estabelecimento_nome
+        description: Nome da unidade de saúde onde o item está localizado
+        data_type: string
+      - name: lote_status
+        description: Status to lote, podendo ser 'active', 'suspended', 'recovered',
+          'removed'
+        data_type: string
+        quote: true
+      - name: lote_data_cadastro
+        description: Data de cadastro do lote
+        data_type: date
+      - name: lote_data_vencimento
+        description: Data de vecimento do lote
+        data_type: date
+      - name: material_descricao
+        description: Descrição do medicamento/insumo
+        data_type: string
+      - name: material_quantidade
+        description: Quantidade disponível do medicamento/insumo
+        data_type: float64
+      - name: armazem
+        description: Armazém onde está localizado o material
+        data_type: string
+        quote: true
+      - name: data_particao
+        description: Data de referencia da posição do estoque
+        data_type: date
+      - name: data_replicacao
+        data_type: date
+        quote: true
+        description: Data de quando os dados foram replicados da unidade de saúde.
+      - name: data_carga
+        description: Data e hora (GMT-3) no qual foi feito o download do dataset
+        data_type: datetime
+  - name: raw_prontuario_vitacare__estoque_movimento
+    description: Movimentação diária dos estoques de medicamentos e insumos das
+      unidades de saúde que utilizam o prontuário Vitacare para gestão de
+      estoque de farmácia e almoxarifado
+    columns:
+      - name: id_estoque_movimento
+        description: Identificador único do registro
+        data_type: string
+      - name: id_surrogate
+        description: Chave surrogada composta pelo id do material, lote, localização de
+          origem, localização de destino, quantidade e data hora da movimentação
+        data_type: string
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__estoque_movimento__id_surrogate__unique
+              config:
+                where: safe_cast(particao_data_movimento as date) = current_date('America/Sao_Paulo')
+          - not_null:
+              name: raw_prontuario_vitacare__estoque_movimento__id_surrogate__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+      - name: area_programatica
+        description: Área programática da unidade de saúde onde o item está localizado
+        data_type: string
+      - name: id_cnes
+        description: Número do CNES (Cadastro Nacional de Estabelecimentos de Saúde) da
+          unidade de saúde onde o item está localizado
+        data_type: string
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__estoque_movimento__id_cnes__not_null
+          - relationships:
+              name: raw_prontuario_vitacare__estoque_movimento__id_cnes__relationship
+              to: ref('dim_estabelecimento')
+              field: id_cnes
+      - name: id_pedido_wms
+        description: Identificador do pedido na TPC que gerou o evento de entrada de
+          medicamentos na unidade.
+        data_type: string
+        quote: true
+      - name: id_lote
+        description: Identificador do lote do medicamento/insumo
+        data_type: string
+      - name: id_material
+        description: Código de identificação do material cadastrado no prontuário
+        data_type: string
+      - name: id_atc
+        description: Código de identificação do material cadastrado no prontuário no
+          padrão ATC
+        data_type: string
+      - name: estabelecimento_nome
+        description: Nome da unidade de saúde onde o item está localizado
+        data_type: string
+      - name: material_descricao
+        description: Descrição do medicamento/insumo
+
+        data_type: string
+      - name: estoque_movimento_data_hora
+        description: Data e hora da movimentação do estoque
+        data_type: datetime
+      - name: estoque_movimento_tipo
+        description: Tipo de movimentação do estoque
+        data_type: string
+      - name: estoque_movimento_correcao_tipo
+        description: Tipo de correção da movimentação do estoque
+        data_type: string
+      - name: estoque_movimento_justificativa
+        description: Justificativa da movimentação do estoque
+        data_type: string
+      - name: estoque_armazem_origem
+        description: Subestoque de origem do medicamento/insumo
+        data_type: string
+        quote: true
+      - name: estoque_armazem_destino
+        description: Subestoque de destino do medicamento/insumo
+        data_type: string
+        quote: true
+      - name: dispensacao_prescritor_cpf
+        description: CPF do prescritor no caso de dispensação para usuário
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+        data_type: string
+        quote: true
+      - name: dispensacao_prescritor_cns
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+        description: CNS do prescritor no caso de dispensação para usuário
+        data_type: string
+      - name: dispensacao_paciente_cpf
+        description: CPF do paciente no caso de dispensação para usuário
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+        data_type: string
+      - name: dispensacao_paciente_cns
+        description: CNS do paciente no caso de dispensação para usuário
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+        data_type: string
+      - name: material_quantidade
+        description: Quantidade movimentada do medicamento/insumo
+        data_type: float64
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              name: raw_prontuario_vitacare__estoque_movimento__material_quantidade__positive
+              min_value: 0
+      - name: data_particao
+        description: Data de referencia da posição do estoque
+        data_type: date
+      - name: data_carga
+        description: Data e hora (GMT-3) no qual foi feito o download do dataset
+        data_type: datetime
+  - name: raw_prontuario_vitacare__paciente
+    description: >
+      Tabela contendo informações dos pacientes a partir do prontuário VitaCare,
+      incluindo dados históricos e rotineiros.
+    columns:
+      - name: id
+        description: Identificador único do paciente.
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__paciente__id__unique
+              config:
+                severity: warn
+                warn_if: ">1000"
+          - not_null:
+              name: raw_prontuario_vitacare__paciente__id__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+      - name: id_cnes
+        description: Número CNES da unidade de saúde onde o paciente é atendido.
+      - name: numero_prontuario
+        description: Número do prontuário do paciente.
+      - name: cpf
+        description: CPF do paciente.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: dnv
+        description: Declaração de Nascido Vivo (DNV) do paciente.
+      - name: nis
+        description: Número de Identificação Social (NIS) do paciente.
+      - name: cns
+        description: Cartão Nacional de Saúde (CNS) do paciente.
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+      - name: nome
+        description: Nome completo do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: nome_social
+        description: Nome social do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: mae_nome
+        description: Nome da mãe do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_MAE") }}'
+      - name: pai_nome
+        description: Nome do pai do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_PAI") }}'
+      - name: obito_indicador
+        description: Indicador se o paciente faleceu.
+        policy_tags:
+          - '{{ var("TAG_DADO_CLINICO") }}'
+      - name: sexo
+        description: Sexo do paciente.
+      - name: orientacao_sexual
+        description: Orientação sexual do paciente.
+      - name: identidade_genero
+        description: Identidade de gênero do paciente.
+      - name: raca
+        description: Raça/cor do paciente.
+      - name: email
+        description: Email de contato do paciente.
+        policy_tags:
+          - '{{ var("TAG_EMAIL") }}'
+      - name: telefone
+        description: Telefone de contato do paciente.
+        policy_tags:
+          - '{{ var("TAG_TELEFONE") }}'
+      - name: nacionalidade
+        description: Nacionalidade do paciente.
+      - name: data_nascimento
+        description: Data de nascimento do paciente.
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: pais_nascimento
+        description: País de nascimento do paciente.
+      - name: municipio_nascimento
+        description: Município de nascimento do paciente.
+      - name: estado_nascimento
+        description: Estado de nascimento do paciente.
+      - name: ap
+        description: Área programática do paciente.
+      - name: microarea
+        description: Código da microárea de atuação da unidade de saúde.
+      - name: nome_unidade
+        description: Nome da unidade de saúde onde o paciente é atendido.
+      - name: equipe_familia_indicador
+        description: Indicador se o paciente pertence a uma equipe de saúde.
+      - name: id_ine
+        description: Código INE da equipe de saúde responsável pelo paciente.
+      - name: data_atualizacao_vinculo_equipe
+        description: Data da última atualização do vínculo do paciente com a equipe de
+          saúde.
+      - name: situacao
+        description: Situação do cadastro do paciente na unidade de saúde
+      - name: cadastro_permanente_indicador
+        description: Indicação se o paciente possui cadastro permanente.
+      - name: cpf_valido_indicador
+        description: Indicador se o CPF do paciente foi validado no datasus.
+      - name: data_cadastro_inicial
+        description: Data de cadastro inicial do paciente.
+      - name: data_ultima_atualizacao_cadastral
+        description: Data da última atualização cadastral do paciente.
+      - name: endereco_tipo_domicilio
+        description: Tipo de domicílio do paciente.
+      - name: endereco_tipo_logradouro
+        description: Tipo de logradouro do endereço do paciente
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_cep
+        description: CEP do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_logradouro
+        description: Logradouro do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_numero
+        description: Número do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_complemento
+        description: Complemento do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_bairro
+        description: Bairro do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_estado
+        description: Estado de residência do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_municipio
+        description: Município de residência do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: data_particao
+        description: Data de partição dos dados.
+      - name: source_created_at
+        description: Data e hora da criação do registro no prontuário.
+      - name: source_updated_at
+        description: Data e hora da última atualização do registro no prontuário.
+      - name: source_imported_at
+        description: Data e hora da importação dos dados para o datalake.
+  - name: base_prontuario_vitacare__paciente_historico
+    description: >
+      Tabela contendo informações dos pacientes a partir do prontuário VitaCare,
+      incluindo dados históricos e rotineiros.
+    columns:
+      - name: id
+        description: Identificador único do paciente.
+        data_tests:
+          - unique:
+              name: base_prontuario_vitacare__paciente_historico__id__unique
+              config:
+                severity: warn
+                warn_if: ">1000"
+      - name: cpf
+        description: CPF do paciente.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: dnv
+        description: Declaração de Nascido Vivo (DNV) do paciente.
+      - name: nis
+        description: Número de Identificação Social (NIS) do paciente.
+      - name: cns
+        description: Cartão Nacional de Saúde (CNS) do paciente.
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+      - name: nome
+        description: Nome completo do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: nome_social
+        description: Nome social do paciente.
+      - name: nome_mae
+        description: Nome da mãe do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_MAE") }}'
+      - name: nome_pai
+        description: Nome do pai do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_PAI") }}'
+      - name: data_obito
+        description: Data de óbito do paciente.
+        policy_tags:
+          - '{{ var("TAG_DADO_CLINICO") }}'
+      - name: sexo
+        description: Sexo do paciente.
+      - name: orientacao_sexual
+        description: Orientação sexual do paciente.
+      - name: identidade_genero
+        description: Identidade de gênero do paciente.
+      - name: raca_cor
+        description: Raça/cor do paciente.
+      - name: email
+        description: Email de contato do paciente.
+        policy_tags:
+          - '{{ var("TAG_EMAIL") }}'
+      - name: telefone
+        description: Telefone de contato do paciente.
+        policy_tags:
+          - '{{ var("TAG_TELEFONE") }}'
+      - name: nacionalidade
+        description: Nacionalidade do paciente.
+      - name: data_nascimento
+        description: Data de nascimento do paciente.
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: pais_nascimento
+        description: País de nascimento do paciente.
+      - name: municipio_nascimento
+        description: Município de nascimento do paciente.
+      - name: estado_nascimento
+        description: Estado de nascimento do paciente.
+      - name: ap
+        description: Área programática do paciente.
+      - name: microarea
+        description: Código da microárea de atuação da unidade de saúde.
+      - name: cnes_unidade
+        description: Número CNES da unidade de saúde onde o paciente é atendido.
+      - name: nome_unidade
+        description: Nome da unidade de saúde onde o paciente é atendido.
+      - name: codigo_equipe_saude
+        description: Código da equipe de saúde responsável pelo paciente.
+      - name: codigo_ine_equipe_saude
+        description: Código INE da equipe de saúde responsável pelo paciente.
+      - name: data_atualizacao_vinculo_equipe
+        description: Data da última atualização do vínculo do paciente com a equipe de saúde.
+      - name: numero_familia
+        description: Número da família do paciente.
+      - name: numero_prontuario
+        description: Número do prontuário do paciente.
+      - name: situacao_usuario
+        description: Situação do paciente quanto ao uso de serviços de saúde.
+      - name: cadastro_permanente
+        description: Indicação se o paciente possui cadastro permanente.
+      - name: data_cadastro_inicial
+        description: Data de cadastro inicial do paciente.
+      - name: data_ultima_atualizacao_cadastral
+        description: Data da última atualização cadastral do paciente.
+      - name: endereco_tipo_domicilio
+        description: Tipo de domicílio do paciente.
+      - name: endereco_tipo_logradouro
+        description: Tipo de logradouro do endereço do paciente.
+      - name: endereco_cep
+        description: CEP do endereço do paciente.
+        policy_tags:
+          - '{{ var("TAG_ENDERECO") }}'
+      - name: endereco_logradouro
+        description: Logradouro do endereço do paciente.
+      - name: endereco_bairro
+        description: Bairro do endereço do paciente.
+      - name: endereco_estado
+        description: Estado de residência do paciente.
+      - name: endereco_municipio
+        description: Município de residência do paciente.
+      - name: data_particao
+        description: Data de partição dos dados.
+      - name: source_updated_at
+        description: Data e hora da última atualização do registro no prontuário.
+      - name: imported_at
+        description: Data e hora da importação dos dados para o datalake.
+  - name: raw_prontuario_vitacare__atendimento
+    columns:
+      - name: id_hci
+        description: Identificador do Histórico Clínico Integrado.
+        data_type: string
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__atendimento__id__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+          - unique:
+              name: raw_prontuario_vitacare__atendimento__id__unique
+              config:
+                severity: warn
+                warn_if: ">1000"
+        quote: true
+      - name: id_prontuario_local
+        description: Identificador único do atendimento no prontuário local.
+        data_type: string
+        quote: true
+      - name: cpf
+        description: CPF do paciente no atendimento.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+        data_type: string
+        quote: true
+      - name: cnes_unidade
+        description: Número CNES da unidade de saúde onde o paciente é atendido.
+        data_type: string
+        quote: true
+      - name: cns_profissional
+        description: CNS do profissional que realizou o atendimento.
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+        data_type: string
+        quote: true
+      - name: cpf_profissional
+        description: Descrição do CPF do profissional que realizou o atendimento.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+        data_type: string
+        quote: true
+      - name: nome_profissional
+        description: Nome do profissional que realizou o atendimento.
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+        data_type: string
+        quote: true
+      - name: cbo_profissional
+        description: Código da Classificação Brasileira de Ocupações do profissional que realizou o atendimento.
+        data_type: string
+        quote: true
+      - name: cbo_descricao_profissional
+        description: Descrição da Ocupação do profissional que realizou o atendimento.
+        data_type: string
+        quote: true
+      - name: cod_equipe_profissional
+        description: Código da equipe de saúde do profissional que realizou o atendimento.
+        data_type: string
+        quote: true
+      - name: cod_ine_equipe_profissional
+        description: Código INE da equipe de saúde do profissional que realizou o atendimento.
+        data_type: string
+        quote: true
+      - name: nome_equipe_profissional
+        description: Nome da equipe de saúde do profissional que realizou o atendimento.
+        data_type: string
+        quote: true
+      - name: tipo
+        description: Tipo de atendimento.
+        data_type: string
+        quote: true
+      - name: eh_coleta
+        description: Indica se o atendimento é uma coleta.
+        data_type: string
+        quote: true
+      - name: datahora_marcacao
+        description: Data e hora da marcação do atendimento.
+        data_type: datetime
+        quote: true
+      - name: datahora_inicio
+        description: Data e hora de início do atendimento.
+        data_type: datetime
+        quote: true
+      - name: datahora_fim
+        description: Data e hora de fim do atendimento.
+        data_type: datetime
+        quote: true
+      - name: soap_subjetivo_motivo
+        description: Motivo subjetivo do atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: soap_objetivo_descricao
+        description: Descrição objetiva do atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: soap_avaliacao_observacoes
+        description: Observações da avaliação do atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: soap_plano_procedimentos_clinicos
+        description: Procedimentos clínicos do plano de atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: soap_plano_observacoes
+        description: Observações do plano de atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: soap_notas_observacoes
+        description: Observações das notas do atendimento SOAP.
+        data_type: string
+        quote: true
+      - name: prescricoes
+        description: Prescrições realizadas durante o atendimento.
+        data_type: string
+        quote: true
+      - name: condicoes
+        description: Condições do paciente durante o atendimento. 
+        data_type: string
+        quote: true
+      - name: exames_solicitados
+        description: Exames solicitados durante o atendimento.
+        data_type: string
+        quote: true
+      - name: alergias_anamnese
+        description: Alergias registradas na anamnese do atendimento.
+        data_type: string
+        quote: true
+      - name: vacinas
+        description: Vacinas administradas durante o atendimento.
+        data_type: string
+        quote: true
+      - name: indicadores
+        description: ...
+        data_type: string
+        quote: true
+      - name: encaminhamentos
+        description: Encaminhamentos realizados durante o atendimento.
+        data_type: string
+        quote: true
+      - name: updated_at
+        description: Data e hora da última atualização dos dados.
+        data_type: datetime
+        quote: true
+      - name: loaded_at
+        description: Data e hora de carregamento dos dados no sistema.
+        data_type: datetime
+        quote: true
+      - name: data_particao
+        description: Data de partição dos dados.
+        data_type: date
+        quote: true
+      - name: origem
+        description: Origem do registro do atendimento (Histórico, contínuo ou rotineiro).
+        data_type: string
+        quote: true
+  - name: base_prontuario_vitacare__atendimento_historico
+    columns:
+      - name: gid
+        data_type: string
+        quote: true
+      - name: cpf
+        data_type: string
+        quote: true
+      - name: cnes_unidade
+        data_type: string
+        quote: true
+      - name: cns_profissional
+        data_type: string
+        quote: true
+      - name: cpf_profissional
+        data_type: string
+        quote: true
+      - name: nome_profissional
+        data_type: string
+        quote: true
+      - name: cbo_profissional
+        data_type: string
+        quote: true
+      - name: cbo_descricao_profissional
+        data_type: string
+        quote: true
+      - name: cod_equipe_profissional
+        data_type: string
+        quote: true
+      - name: cod_ine_equipe_profissional
+        data_type: string
+        quote: true
+      - name: nome_equipe_profissional
+        data_type: string
+        quote: true
+      - name: tipo
+        data_type: string
+        quote: true
+      - name: eh_coleta
+        data_type: string
+        quote: true
+      - name: datahora_marcacao
+        data_type: datetime
+        quote: true
+      - name: datahora_inicio
+        data_type: datetime
+        quote: true
+      - name: datahora_fim
+        data_type: datetime
+        quote: true
+      - name: soap_subjetivo_motivo
+        data_type: string
+        quote: true
+      - name: soap_objetivo_descricao
+        data_type: string
+        quote: true
+      - name: soap_avaliacao_observacoes
+        data_type: string
+        quote: true
+      - name: soap_plano_procedimentos_clinicos
+        data_type: string
+        quote: true
+      - name: soap_plano_observacoes
+        data_type: string
+        quote: true
+      - name: soap_notas_observacoes
+        data_type: string
+        quote: true
+      - name: prescricoes
+        data_type: string
+        quote: true
+      - name: condicoes
+        data_type: string
+        quote: true
+      - name: exames_solicitados
+        data_type: string
+        quote: true
+      - name: alergias_anamnese
+        data_type: string
+        quote: true
+      - name: vacinas
+        data_type: string
+        quote: true
+      - name: indicadores
+        data_type: string
+        quote: true
+      - name: encaminhamentos
+        data_type: string
+        quote: true
+      - name: updated_at
+        data_type: datetime
+        quote: true
+      - name: loaded_at
+        data_type: datetime
+        quote: true
+      - name: data_particao
+        data_type: date
+        quote: true
+
+  - name: raw_prontuario_vitacare__vacinacao
+    description: Esta tabela contém informações
+      detalhadas sobre os registros de vacinação dos pacientes no sistema
+      Vitacare. Inclui identificadores para o paciente, a equipe de saúde e o
+      estabelecimento de saúde, bem como os detalhes pessoais do paciente, como
+      nome, sexo, data de nascimento e nome da mãe. O modelo também fornece
+      informações sobre a vacina, incluindo sua descrição, data de aplicação,
+      dose e lote. Além disso, contém detalhes sobre o profissional de saúde
+      que administrou a vacina, incluindo seu nome e códigos profissionais. O
+      modelo também inclui informações de particionamento para gerenciamento
+      eficiente de dados e um timestamp 'imported_at' indicando quando os dados
+      foram carregados no sistema.
+    columns:
+      - name: id_vacinacao
+        description: Este é o identificador único para cada registro no modelo
+          dentro do prontuário vitacare. É uma combinação do id_cnes e do id
+          original dos dados de origem. Este id é usado para identificar
+          exclusivamente cada registro de vacinação.
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__vacinacao__id__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+        data_type: string
+        quote: true
+      - name: id_surrogate
+        description: Esta é uma chave substituta para cada registro. É um valor hash gerado a partir do
+          id_cnes e do id original dos dados de origem. Esta chave substituta é
+          usada para fins de data warehousing para garantir a integridade dos
+          dados e lidar com mudanças nos dados de origem ao longo do tempo.
+        data_type: string
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__vacinacao__id_surrogate_unique
+          - not_null:
+              name: raw_prontuario_vitacare__vacinacao__id_surrogate__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+        quote: true
+      - name: id_cnes
+        description: Este é o identificador único para o estabelecimento de saúde onde
+          a vacinação foi administrada. Este id é usado para vincular o registro de vacinação
+          ao estabelecimento de saúde específico no sistema de saúde.
+        data_type: string
+        quote: true
+      - name: id_microarea
+        description: Este é um identificador único para a microárea onde o paciente está
+          localizado. É usado para categorizar pacientes com base em sua
+          localização geográfica dentro do sistema de saúde.
+        data_type: string
+        quote: true
+      - name: id_equipe
+        description: Este é um identificador único para a equipe de saúde responsável
+          pelo paciente. É usado para rastrear qual equipe está fornecendo
+          cuidados ao paciente.
+        data_type: string
+        quote: true
+      - name: id_equipe_ine
+        description: Este é um identificador único para a equipe de saúde, reconhecido
+          pelo Cadastro Nacional de Estabelecimentos de Saúde (CNES). É usado
+          para fins oficiais de relatórios e rastreamento.
+        data_type: string
+        quote: true
+      - name: requisicao_area_programatica
+        description: Este campo representa a área programática do estabelecimento de
+          saúde onde o paciente recebeu a vacina.
+        data_type: string
+        quote: true
+      - name: paciente_id_prontuario
+        description: Este é o identificador único para cada paciente no sistema
+          Vitacare dentro da unidade de saúde onde está cadastrado. Este valor
+          somente está preenchido para pacientes que posuem uma equipe da família
+          vinculada.
+        data_type: string
+        quote: true
+      - name: estabelecimento_nome
+        description: Este campo representa o nome do estabelecimento de saúde onde o
+          paciente recebeu a vacina. 
+        data_type: string
+        quote: true
+      - name: paciente_cpf
+        description: Esta coluna representa o CPF (Cadastro de Pessoas Físicas) do
+          paciente.
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_CPF") }}'
+      - name: paciente_cns
+        description: Esta coluna representa o CNS (Cartão Nacional de Saúde) do
+          paciente.
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_CNS") }}'
+      - name: paciente_nome
+        description: Esta coluna representa o nome do paciente.
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_NOME") }}'
+      - name: paciente_sexo
+        description: Esta coluna representa o sexo do paciente. 
+        data_type: string
+        quote: true
+      - name: paciente_nascimento_data
+        description: Este campo representa a data de nascimento do paciente. É
+          armazenado no formato AAAA-MM-DD.
+        data_type: date
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: paciente_nome_mae
+        description: Este campo contém o nome completo da mãe do paciente.
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_NOME_MAE") }}'
+      - name: paciente_mae_nascimento_data
+        description: Este campo representa a data de nascimento da mãe do paciente. É
+          armazenado no formato AAAA-MM-DD. 
+        data_type: date
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: paciente_situacao
+        description: Este campo representa o status atual do paciente. Fornece
+          informações sobre se o paciente está ativo, inativo ou em qualquer
+          outro estado específico no sistema de saúde.
+        data_type: string
+        quote: true
+      - name: paciente_cadastro_data
+        description: Este campo representa a data em que o paciente foi registrado no
+          sistema. 
+        data_type: date
+        quote: true
+      - name: paciente_obito
+        description: Este campo indica se o paciente é falecido.
+        data_type: string
+        quote: true
+      - name: vacina_descricao
+        description: Esta coluna contém a descrição da vacina que foi administrada ao
+          paciente. 
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_DADO_CLINICO") }}'
+      - name: vacina_aplicacao_data
+        description: Esta coluna representa a data em que a vacina foi aplicada ao
+          paciente. É um campo de data e está formatado como AAAA-MM-DD.
+        data_type: date
+        quote: true
+      - name: vacina_registro_data
+        description: Esta coluna representa a data e hora em que o registro de vacinação
+          foi registrado no sistema. É um campo de data e hora e está formatado
+          como AAAA-MM-DD HH:MM:SS.
+        data_type: datetime
+        quote: true
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__vacinacao__data_registro__not_null
+              config:
+                severity: warn
+                warn_if: ">1"
+      - name: vacina_dose
+        description: Este campo representa a dose da vacina que foi administrada ao
+          paciente. 
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_DADO_CLINICO") }}'
+      - name: vacina_lote
+        description: Este campo representa o número do lote da vacina. 
+        data_type: string
+        quote: true
+      - name: vacina_registro_tipo
+        description: Este campo representa o tipo de registro. É um valor de string que
+          fornece informações sobre a natureza do registro, como se é um novo
+          registro de vacinação ou um registro retroativo.
+        data_type: string
+        quote: true
+      - name: vacina_estrategia
+        description: Este campo representa a estratégia usada para a vacinação.
+        data_type: string
+        quote: true
+      - name: vacina_diff
+        description: Diferença, em dias, entre a data de aplicação da vacina e a data de registro da vacina.
+        data_type: string
+        quote: true
+      - name: equipe_nome
+        description: Este campo representa o nome da equipe que vinculada ao paciente na unidade de saúde.
+          vacinações.
+        data_type: string
+        quote: true
+      - name: profissional_cbo
+        description: Esta coluna representa o código da Classificação Brasileira de
+          Ocupações (CBO) para o profissional de saúde que administrou a vacina.
+        data_type: string
+        quote: true
+      - name: profissional_cns
+        description: Esta coluna contém o número do Cartão Nacional de Saúde (CNS) do
+          profissional de saúde que administrou a vacina.
+        data_type: string
+        quote: true
+      - name: profissional_cpf
+        description: Esta coluna representa o número do Cadastro de Pessoas Físicas
+          (CPF) do profissional de saúde que administrou a vacina. 
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_CPF") }}'
+      - name: profissional_nome
+        description: Esta coluna contém o nome do profissional de saúde que administrou
+          a vacina.
+        data_type: string
+        quote: true
+        policy_tags:
+        - '{{ var("TAG_NOME") }}'
+      - name: requisicao_endpoint
+        description: Este campo representa o endpoint utilizado na requisição que 
+          originou o registro de vacinação. Ele indica a fonte requisitada dentro 
+          do sistema de saúde.
+        data_type: string
+        quote: true
+      - name: requisicao_id_cnes
+        description: Este é o identificador único para o estabelecimento de saúde que 
+          foi utilizado na requisição. Este id representa o CNES requisitado, 
+          associado ao registro de vacinação no sistema de saúde.
+        data_type: string
+        quote: true
+      - name: particao_data_vacinacao
+        description: Esta coluna representa o ano da partição. É usada para
+          particionamento de dados e ajuda na recuperação eficiente de dados. Os
+          dados são armazenados no formato de uma string.
+        data_type: string
+        quote: true
+      - name: mes_particao
+        description: Esta coluna representa o mês da partição. Semelhante ao
+          'ano_particao', é usado para particionamento de dados e ajuda na
+          recuperação eficiente de dados. Os dados são armazenados no formato de
+          uma string.
+        data_type: string
+        quote: true
+      - name: data_particao
+        description: Esta coluna representa a data de particionamento. É usada para
+          organizar os dados de uma maneira que facilite o gerenciamento e a
+          consulta. A data está no formato 'AAAA-MM-DD'.
+        data_type: string
+        quote: true
+      - name: imported_at
+        description: Esta coluna indica a data e hora em que os dados foram importados
+          para o datalake. Ajuda a rastrear as atualizações de dados e é
+          útil para auditoria de dados e controle de versão. A data e hora estão
+          no formato 'AAAA-MM-DD HH:MM:SS'.
+        data_type: string
+        quote: true
+      - name: metadados
+        description: Metadados do registro      
+  - name: raw_prontuario_vitacare__ficha_a
+    description: >
+      Tabela contendo informações processadas a partir de eventos de pacientes,
+      incluindo dados cadastrais e informações associadas.
+    columns:
+      - name: id
+        description: Identificador global criado para cada paciente a partir da junção do id_cnes e do id_paciente_vitacare.
+        policy_tags:
+          - '{{ var("TAG_IDENTIDADE") }}'
+        data_tests:
+          - unique:
+              name: raw_prontuario_vitacare__ficha_a__id__unique
+              config:
+                severity: warn
+                warn_if: ">1000"
+          - not_null:
+              name: raw_prontuario_vitacare__ficha_a__id__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+      - name: cpf
+        description: CPF do paciente.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__ficha_a__cpf__not_null
+              config:
+                severity: warn
+                warn_if: ">100"
+      - name: id_paciente
+        description: Identificador único do paciente utilizado para ligar tabelas no datalake.
+      - name: id_paciente_vitacare
+        description: Identificador único do paciente no sistema.
+        policy_tags:
+          - '{{ var("TAG_IDENTIDADE") }}'
+        data_tests:
+          - not_null:
+              name: raw_prontuario_vitacare__ficha_a__id_paciente_vitacare__not_null
+      - name: unidade_cadastro
+        description: Unidade de saúde responsável pelo cadastro do paciente.
+      - name: unidade_nome
+        description: Nome da unidade de saúde responsável pelo cadastro do paciente.
+      - name: ap_cadastro
+        description: Área programática associada ao cadastro do paciente.
+      - name: nome
+        description: Nome completo do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: sexo
+        description: Sexo do paciente.
+      - name: obito
+        description: Indicação se o paciente possui registro de óbito.
+      - name: bairro
+        description: Bairro de residência do paciente.
+      - name: comodos
+        description: Número de cômodos no domicílio do paciente.
+      - name: nome_mae
+        description: Nome da mãe do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_MAE") }}'
+      - name: nome_pai
+        description: Nome do pai do paciente.
+        policy_tags:
+          - '{{ var("TAG_NOME_PAI") }}'
+      - name: raca_cor
+        description: Raça/cor do paciente.
+      - name: ocupacao
+        description: Ocupação do paciente.
+      - name: religiao
+        description: Religião do paciente.
+      - name: telefone
+        description: Telefone de contato do paciente.
+        policy_tags:
+          - '{{ var("TAG_TELEFONE") }}'
+      - name: ine_equipe
+        description: Código INE da equipe de saúde responsável pelo paciente.
+      - name: equipe_nome
+        description: Nome da equipe de saúde responsável pelo paciente.
+      - name: microarea
+        description: Código da microárea de atuação da unidade de saúde.
+      - name: logradouro
+        description: Logradouro do endereço do paciente.
+      - name: nome_social
+        description: Nome social do paciente.
+      - name: destino_lixo
+        description: Tipo de destino dado ao lixo no domicílio do paciente.
+      - name: luz_eletrica
+        description: Indicação se o domicílio possui luz elétrica.
+      - name: codigo_equipe
+        description: Código da equipe de saúde responsável pelo paciente.
+      - name: data_cadastro
+        description: Data de cadastro do paciente.
+      - name: escolaridade
+        description: Nível de escolaridade do paciente.
+      - name: tempo_moradia
+        description: Tempo de moradia no local atual do paciente.
+      - name: nacionalidade
+        description: Nacionalidade do paciente.
+      - name: renda_familiar
+        description: Renda familiar do paciente.
+      - name: tipo_domicilio
+        description: Tipo de domicílio do paciente.
+      - name: data_nascimento
+        description: Data de nascimento do paciente.
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: pais_nascimento
+        description: País de nascimento do paciente.
+      - name: tipo_logradouro
+        description: Tipo de logradouro do endereço do paciente.
+      - name: tratamento_agua
+        description: Tipo de tratamento de água utilizado no domicílio.
+      - name: em_situacao_de_rua
+        description: Indicação se o paciente está em situação de rua.
+      - name: frequenta_escola
+        description: Indicação se o paciente frequenta escola.
+      - name: meios_transporte
+        description: Meios de transporte utilizados pelo paciente.
+      - name: situacao_usuario
+        description: Situação do paciente quanto ao uso de serviços de saúde.
+      - name: doencas_condicoes
+        description: Doenças ou condições de saúde registradas no paciente.
+      - name: estado_nascimento
+        description: Estado de nascimento do paciente.
+      - name: estado_residencia
+        description: Estado de residência do paciente.
+      - name: identidade_genero
+        description: Identidade de gênero do paciente.
+      - name: meios_comunicacao
+        description: Meios de comunicação utilizados pelo paciente.
+      - name: orientacao_sexual
+        description: Orientação sexual do paciente.
+      - name: possui_filtro_agua
+        description: Indicação se o domicílio possui filtro de água.
+      - name: possui_plano_saude
+        description: Indicação se o paciente possui plano de saúde.
+      - name: situacao_familiar
+        description: Situação familiar do paciente.
+      - name: territorio_social
+        description: Território social ao qual o paciente pertence.
+      - name: abastecimento_agua
+        description: Tipo de abastecimento de água do domicílio.
+      - name: animais_no_domicilio
+        description: Indicação se há animais no domicílio.
+      - name: cadastro_permanente
+        description: Indicação se o paciente possui cadastro permanente.
+      - name: familia_localizacao
+        description: Localização da família do paciente.
+      - name: em_caso_doenca_procura
+        description: Indicação sobre o que o paciente faz em caso de doença.
+      - name: municipio_nascimento
+        description: Município de nascimento do paciente.
+      - name: municipio_residencia
+        description: Município de residência do paciente.
+      - name: responsavel_familiar
+        description: Nome do responsável familiar do paciente.
+      - name: esgotamento_sanitario
+        description: Tipo de esgotamento sanitário do domicílio.
+      - name: situacao_moradia_posse
+        description: Situação de posse da moradia do paciente.
+      - name: situacao_profissional
+        description: Situação profissional do paciente.
+      - name: vulnerabilidade_social
+        description: Vulnerabilidades sociais associadas ao paciente.
+      - name: familia_beneficiaria_cfc
+        description: Indicação se a família do paciente é beneficiária do CFC.
+      - name: data_atualizacao_cadastro
+        description: Data da última atualização cadastral do paciente.
+      - name: participa_grupo_comunitario
+        description: Indicação se o paciente participa de grupos comunitários.
+      - name: relacao_responsavel_familiar
+        description: Relação com o responsável familiar.
+      - name: membro_comunidade_tradicional
+        description: Indicação se o paciente é membro de uma comunidade tradicional.
+      - name: data_atualizacao_vinculo_equipe
+        description: Data da última atualização do vínculo com a equipe de saúde.
+      - name: familia_beneficiaria_auxilio_brasil
+        description: Indicação se a família do paciente é beneficiária do Auxílio Brasil.
+      - name: crianca_matriculada_creche_pre_escola
+        description: Indicação se a criança está matriculada em creche ou pré-escola.
+      - name: updated_at
+        description: Data e hora da última atualização dos dados.
+      - name: loaded_at
+        description: Data e hora de carregamento dos dados no sistema.
+      - name: tipo
+        description: Tipo de origem da ficha A historico ou rotineiro.

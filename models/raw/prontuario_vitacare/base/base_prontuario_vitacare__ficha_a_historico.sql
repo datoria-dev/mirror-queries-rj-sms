@@ -1,0 +1,116 @@
+{{
+    config(
+        schema="brutos_prontuario_vitacare_staging",
+        alias="_base_ficha_a_historico",
+        materialized="incremental",
+        incremental_strategy='merge', 
+        unique_key="id",
+        tags=['monthly']
+    )
+}}
+
+{% set partitions_to_replace = (
+    "date_sub(current_date('America/Sao_Paulo'), interval 10 day)"
+) %}
+
+with
+
+    source as (
+        select
+            concat(
+                nullif(id_cnes, ''),
+                '.',
+                id_local
+            ) as id, 
+            * 
+        from {{ ref("raw_prontuario_vitacare_historico__cadastro") }}
+        {% if is_incremental() %} 
+        where data_particao >=  {{ partitions_to_replace }}
+        {% endif %}
+    ),
+
+    dados_ficha_a as (
+        select
+            cast(id as string) as id,
+            
+            cast(cpf as string) as cpf,
+            id_local as id_paciente,
+            npront as numero_prontuario,
+            
+            id_cnes as unidade_cadastro,
+            ap as ap_cadastro,
+
+            nome,
+            sexo,
+            obito,
+            bairro,
+            comodos,
+            nome_mae,
+            nome_pai,
+            raca_cor,
+            ocupacao,
+            religiao,
+            telefone,
+            ine_equipe,
+            microarea,
+            logradouro,
+            nome_social,
+            destino_lixo,
+            luz_eletrica,
+            codigo_equipe,
+            data_cadastro,
+            escolaridade,
+            tempo_moradia,
+            nacionalidade,
+            renda_familiar,
+            tipo_domicilio,
+            data_nascimento,
+            pais_nascimento,
+            tipo_logradouro,
+            tratamento_agua,
+            em_situacao_de_rua,
+            frequenta_escola,
+            meios_transporte,
+            situacao_usuario,
+            doencas_condicoes,
+            estado_nascimento,
+            estado_residencia,
+            identidade_genero,
+            meios_comunicacao,
+            orientacao_sexual,
+            possui_filtro_agua,
+            possui_plano_saude,
+            situacao_familiar,
+            territorio_social,
+            abastecimento_agua,
+            animais_no_domicilio,
+            cadastro_permanente,
+            familia_localizacao,
+            em_caso_doenca_procura,
+            municipio_nascimento,
+            municipio_residencia,
+            responsavel_familiar,
+            esgotamento_sanitario,
+            situacao_moradia_posse,
+            situacao_profissional,
+            vulnerabilidade_social,
+            familia_beneficiaria_cfc,
+            data_atualizacao_cadastro,
+            participa_grupo_comunitario,
+            relacao_responsavel_familiar,
+            membro_comunidade_tradicional,
+            data_atualizacao_vinculo_equipe,
+            familia_beneficiaria_auxilio_brasil,
+            crianca_matriculada_creche_pre_escola,
+
+            updated_at,
+            loaded_at
+        from source
+        qualify row_number() over (
+            partition by id
+            order by updated_at desc
+        ) = 1
+    )
+
+select *
+from dados_ficha_a

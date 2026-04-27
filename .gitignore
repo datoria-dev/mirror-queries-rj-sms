@@ -1,0 +1,15 @@
+**/test.*
+.vscode/
+target/
+dbt_packages/
+logs/
+.env
+credentials/
+.python-version
+target-base/
+*.DS_Store
+/dbt_packages
+.state/
+.cursorignore
+.cursor/
+dbt_internal_packages/

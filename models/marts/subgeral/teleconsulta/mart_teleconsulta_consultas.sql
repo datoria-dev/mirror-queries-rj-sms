@@ -1,0 +1,167 @@
+{{
+  config(
+    schema="projeto_teleconsulta",
+    alias="teleconsultas",
+  )
+}}
+
+with
+
+    dedup_paciente as (
+        select *
+        from {{ ref("raw_prontuario_vitacare_historico__cadastro") }}
+        qualify row_number() over (partition by id_global order by loaded_at desc) = 1
+    ),
+
+    dedup_profissional as (
+        select *
+        from {{ ref("raw_prontuario_vitacare_historico__profissional") }}
+        qualify row_number() over (partition by id_global order by loaded_at desc) = 1
+    ),
+
+    condicoes_ativas as (
+        select
+            id_prontuario_global as id_atendimento,
+            array_agg(cod_cid10) as condicoes_ativas
+        from {{ ref("raw_prontuario_vitacare_historico__condicao") }}
+        where estado = 'ATIVO'
+        group by 1
+    ),
+
+    estabelecimentos as (
+        select id_cnes, area_programatica, nome_limpo
+        from {{ ref("dim_estabelecimento") }}
+    ),
+
+    agendamentos_tele as (
+        select
+            age.id_global as id_agendamento,
+            cast(null as string) as id_atendimento,
+            age.id_cnes,
+
+            upper(cad.nome) as nome,
+            cad.cpf,
+            cad.cns,
+            cad.sexo,
+            cad.raca_cor,
+            cad.bairro as bairro_residencia,
+            cad.id_cnes as id_unidade_referencia,
+            cad.equipe,
+            cad.ine_equipe,
+
+            upper(prof.profissional_nome) as profissional_nome,
+            prof.profissional_cbo as profissional_cbo,
+            prof.profissional_cbo_descricao as profissional_cbo_descricao,
+            prof.profissional_equipe_nome as profissional_equipe_nome,
+            prof.profissional_equipe_cod_ine as profissional_equipe_cod_ine,
+
+            datahora_agendamento as dthr_marcacao,
+            safe_cast(null as datetime) as dthr_inicio_atendimento,
+            safe_cast(null as datetime) as dthr_fim_atendimento,
+
+            cast(null as string) as eh_coleta,
+            tipo_consulta,
+
+            estado_marcacao,
+            motivo,
+
+            cast(null as string) as subjetivo_motivo,
+            cast(null as string) as plano_observacoes,
+            cast(null as string) as avaliacao_observacoes,
+            cast(null as string) as notas_observacoes,
+
+            age.loaded_at
+        from {{ ref("raw_prontuario_vitacare_historico__agendamento") }} age
+            left join dedup_profissional prof on prof.id_global = age.id_profissional
+            left join dedup_paciente cad on cad.id_global = age.id_cadastro
+        where
+            tipo_atendimento = 'TELECONSULTA'
+    ),
+    atendimentos_tele as (
+        select
+            acto.id_global as id_atendimento,
+            cast(null as string) as id_agendamento,
+            acto.id_cnes,
+
+            upper(cad.nome) as nome,
+            cad.cpf,
+            cad.cns,
+            cad.sexo,
+            cad.raca_cor,
+            cad.bairro as bairro_residencia,
+            cad.id_cnes as id_unidade_referencia,
+            cad.equipe,
+            cad.ine_equipe,
+
+            upper(profissional_nome) as profissional_nome,
+            profissional_cbo as profissional_cbo,
+            profissional_cbo_descricao as profissional_cbo_descricao,
+            profissional_equipe_nome as profissional_equipe_nome,
+            profissional_equipe_cod_ine as profissional_equipe_cod_ine,
+
+            datahora_marcacao_atendimento as dthr_marcacao,
+            safe_cast(datahora_inicio_atendimento as datetime) as dthr_inicio_atendimento,
+            safe_cast(datahora_fim_atendimento as datetime) as dthr_fim_atendimento,
+
+            eh_coleta,
+            tipo_consulta,
+
+            'EXECUTADO' as estado_marcacao,
+            'N/A' as motivo,
+
+            subjetivo_motivo,
+            plano_observacoes,
+            avaliacao_observacoes,
+            notas_observacoes,
+
+            acto.loaded_at
+        from
+            {{ ref("raw_prontuario_vitacare_historico__acto") }} acto
+            left join dedup_paciente cad on cad.id_global = acto.id_cadastro
+        where
+            tipo_atendimento = 'TELECONSULTA'
+    ),
+    juncao as (
+        select 
+            id_agendamento, id_atendimento, id_cnes, nome, cpf, cns, sexo, raca_cor, 
+            bairro_residencia, id_unidade_referencia, equipe, ine_equipe, 
+            profissional_nome, profissional_cbo, profissional_cbo_descricao, profissional_equipe_nome, profissional_equipe_cod_ine,
+            tipo_consulta, dthr_marcacao, dthr_inicio_atendimento, dthr_fim_atendimento, 
+            estado_marcacao, motivo, eh_coleta, subjetivo_motivo, plano_observacoes, avaliacao_observacoes, notas_observacoes
+        from agendamentos_tele
+
+        union all
+
+        select 
+            id_agendamento, id_atendimento, id_cnes, nome, cpf, cns, sexo, raca_cor, 
+            bairro_residencia, id_unidade_referencia, equipe, ine_equipe, 
+            profissional_nome, profissional_cbo, profissional_cbo_descricao, profissional_equipe_nome, profissional_equipe_cod_ine,
+            tipo_consulta, dthr_marcacao, dthr_inicio_atendimento, dthr_fim_atendimento, 
+            estado_marcacao, motivo, eh_coleta, subjetivo_motivo, plano_observacoes, avaliacao_observacoes, notas_observacoes
+        from atendimentos_tele
+    ),
+
+    enriquecimento as (
+        select
+            estabelecimentos.area_programatica,
+            estabelecimentos.nome_limpo,
+            juncao.*,
+            condicoes_ativas.condicoes_ativas
+        from juncao
+            left join condicoes_ativas on juncao.id_atendimento = condicoes_ativas.id_atendimento
+            left join estabelecimentos on juncao.id_cnes = estabelecimentos.id_cnes
+    ),
+
+    -- TEMPORARIO P/ ANONIMIZAR
+    anonimizacao as (
+        select
+            * except (
+                nome, cpf, cns, 
+                id_agendamento, id_atendimento,
+                motivo, subjetivo_motivo, plano_observacoes, avaliacao_observacoes, notas_observacoes
+            )
+        from enriquecimento
+    )
+select *
+from anonimizacao
+order by id_cnes, dthr_marcacao

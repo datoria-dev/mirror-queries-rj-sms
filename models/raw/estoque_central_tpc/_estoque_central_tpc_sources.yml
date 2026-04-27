@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: brutos_estoque_central_tpc_staging
+    database: rj-sms
+    schema: brutos_estoque_central_tpc_staging
+    tables:
+      - name: estoque_posicao
+        loaded_at_field: "CAST(_data_carga AS TIMESTAMP)"
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}

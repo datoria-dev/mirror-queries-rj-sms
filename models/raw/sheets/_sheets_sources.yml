@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: brutos_sheets_staging
+    database: rj-sms
+    schema: brutos_sheets_staging
+    tables:
+      - name: estabelecimento_auxiliar
+      - name: gerenciamento_acesso_looker_farmacia
+      - name: material_mestre
+      - name: material_cobertura_programas
+      - name: material_remume
+      - name: compras_registro_preco
+      - name: compras_atas_processos_vigentes
+      - name: aps_farmacias
+      - name: profissionais_cns_cpf_aux
+      - name: assistencial_procedimento
+      - name: usuarios_permitidos_hci
+      - name: municipios_rio
+      - name: municipios_brasil
+      - name: projeto_c34_cids
+      - name: projeto_c34_procedimentos
+      - name: procedimentos_ser
+      - name: bairros_rio
+      - name: usuarios_bigquery
+      - name: cids_risco_gestacional
+      - name: encaminhamentos_ser
+      - name: cdi_destinatarios
+      - name: seguranca_destinatarios
+      - name: seguranca_cids
+      - name: contatos_caps
+      - name: codigos_exames
+      - name: projeto_odontologia_historico
+      - name: projeto_odontologia_historico_ap
+      - name: projeto_odontologia_sigtap_odo
+      - name: medicamentos_uso_continuo
+
+  - name: brutos_sheets
+    database: rj-sms
+    schema: brutos_sheets
+    tables:
+      - name: projeto_estoque_acessos

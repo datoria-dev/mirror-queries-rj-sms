@@ -1,0 +1,112 @@
+models:
+  - name: raw_minhasaude_mongodb__perfil_acessos
+    description: Representa a coleção 'perfil_acessos' do MongoDB, responsável por registrar os logs de acessos ao MinhaSaude.rio. Esta tabela exibe a versão mais atual dos dados extraídos.
+    columns:
+      - name: _id
+        description: Identificador único do documento, gerado automaticamente pelo MongoDB.
+        data_type: string
+        quote: true
+      - name: idmodulo
+        description: Chave estrangeira referente a algum módulo da tabela 'modulos_perfil_acessos'
+        data_type: string
+        quote: true
+      - name: idusuario
+        description: ID do usuário referente à tabela de usuários (users) da subpav_principal, obtido através do JWT do usuário logado ao MinhaSaude.rio.
+        data_type: string
+        quote: true
+      - name: nome
+        description: Nome do usuário, obtido através do JWT do usuário logado ao MinhaSaude.rio.
+        data_type: string
+        quote: true
+      - name: cpf
+        description: CPF do usuário, obtido através do JWT do usuário logado ao MinhaSaude.rio.
+        data_type: string
+        quote: true
+      - name: cns
+        description: CNS do usuário, obtido através do JWT do usuário logado ao MinhaSaude.rio.
+        data_type: string
+        quote: true
+      - name: logingovbr
+        description: Valor obtido através do JWT do usuário logado ao MinhaSaude.rio, sendo 1 para usuário logado através do login integrado GOV.BR, 0 para usuário logado através de autenticação da plataforma.
+        data_type: boolean
+        quote: true
+      - name: origem
+        description: Origem do registro de log, podendo ser 'web', 'android', 'ios'.
+        data_type: string
+        quote: true
+      - name: createdat
+        description: Timestamp gerado automaticamente pelo MongoDB ao criar o documento.
+        data_type: datetime
+        quote: true
+      - name: updatedat
+        description: Timestamp gerado automaticamente pelo MongoDB ao executar algum update no documento.
+        data_type: datetime
+        quote: true
+      - name: __v
+        description: Campo de versão do documento no MongoDB, usado internamente para evitar conflitos em operações simultâneas.
+        data_type: string
+        quote: true
+      - name: data_extracao
+        description: A data e hora em que os dados foram extraídos.
+        data_type: datetime
+        quote: true
+      - name: ano_particao
+        description: Esta coluna representa o ano da partição. 
+        data_type: int64
+        quote: true
+      - name: mes_particao
+        description: Esta coluna representa o mês da partição.
+        data_type: int64
+        quote: true
+      - name: data_particao
+        description: Esta coluna representa a data da partição. É baseada na data_extração, e é utilizada para fins de organização dos dados e consultas mais rápidas.
+        data_type: date
+        quote: true
+
+  - name: raw_minhasaude_mongodb__modulos_perfil_acessos
+    description: Representa a coleção 'modulos_perfil_acessos' do MongoDB, responsável por listar os módulos disponíveis no MinhaSaude.rio. Esta tabela exibe a versão mais atual dos dados extraídos.
+    columns:
+      - name: _id
+        description: Identificador único de cada registro na tabela, gerado automaticamente pelo MongoDB.
+        data_type: string
+        quote: true
+      - name: rota
+        description: Endereço da rota da página na web.
+        data_type: string
+        quote: true
+      - name: nome
+        description: Titulo dado à rota.
+        data_type: string
+        quote: true
+      - name: descricao
+        description: Descrição da funcionalidade da rota.
+        data_type: string
+        quote: true
+      - name: createdat
+        description: Timestamp gerado automaticamente pelo MongoDB ao criar o documento.
+        data_type: datetime
+        quote: true
+      - name: updatedat
+        description: Timestamp gerado automaticamente pelo MongoDB ao executar algum update no documento.
+        data_type: datetime
+        quote: true
+      - name: __v
+        description: Campo de versão do documento no MongoDB, usado internamente para evitar conflitos em operações simultâneas.
+        data_type: string
+        quote: true
+      - name: data_extracao
+        description: A data e hora em que os dados foram extraídos.
+        data_type: datetime
+        quote: true
+      - name: ano_particao
+        description: Esta coluna representa o ano da partição.
+        data_type: int64
+        quote: true
+      - name: mes_particao
+        description: Esta coluna representa o mês da partição.
+        data_type: int64
+        quote: true
+      - name: data_particao
+        description: Esta coluna representa a data da partição. É baseada em 'data_extracao' e utilizada para organização dos dados e consultas mais rápidas.
+        data_type: date
+        quote: true

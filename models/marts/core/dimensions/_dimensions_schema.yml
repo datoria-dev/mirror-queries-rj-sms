@@ -1,0 +1,510 @@
+version: 2
+models:
+  - name: dim_material
+    description: Tabela contendo a relação de insumos e medicamentos
+    columns:
+      - name: id_material
+        description: Este é o identificador único para cada material. É usado para rastrear e gerenciar materiais no sistema.
+        data_type: string
+        data_tests:
+          - unique:
+              name: core__dim_material__id_material__unique
+      - name: descricao
+        description: Esta é uma descrição do material. Fornece informações detalhadas sobre o material, incluindo seu nome e quaisquer outros detalhes relevantes.
+        data_type: string
+      - name: concentracao
+        description: Isso se refere à concentração do ingrediente ativo no material. É um fator importante para determinar a potência e eficácia do material.
+        data_type: string
+      - name: forma_farmaceutica
+        description: Esta coluna representa a forma farmacêutica do material. Descreve a forma física em que o material é produzido ou administrado. Exemplos incluem comprimidos, cápsulas, soluções, etc.
+        data_type: string
+      - name: apresentacao
+        description: Esta coluna representa a apresentação do material. Descreve como o material é apresentado ou embalado. Por exemplo, um material pode ser apresentado em uma garrafa, uma cartela, um tubo, etc.
+        data_type: string
+      - name: nome
+        description: Esta coluna representa o nome do material. É uma combinação da descrição do material, concentração e apresentação ou forma farmacêutica. Este campo é útil para identificar o material de maneira mais detalhada e abrangente.
+        data_type: string
+      - name: descricao_alternativa
+        description: Descrição alternativa do material
+        data_type: string
+      - name: programa_estrategico
+        description: Nome do programa estratégico do qual o material pertence (quando houver)
+        data_type: string
+      - name: observacao
+        description: Campo genérico para observações sobre o material
+        data_type: string
+      - name: hierarquia_n1_categoria
+        description: Esta coluna representa a categoria do material. Classifica o material em um grupo específico com base em suas características ou uso pretendido. Um material pode pertencer à categoria medicamento, insumo ou imunizante.
+        data_type: string
+      - name: hierarquia_n2_subcategoria
+        description: Este campo representa a subcategoria do material. Fornece informações mais específicas sobre o tipo de material, ajudando a classificá-lo ainda mais dentro de sua categoria principal. Por exemplo, um material do grupo medicamento pode pertencer às subcategorias como antibióticos, analgésicos, etc.
+        data_type: string
+      - name: ativo_indicador
+        description: Este campo indica se item está ativo.
+        data_type: string
+        quote: true
+      - name: controlado_indicador
+        description: Este campo indica se o material é controlado ou não. Um material controlado é aquele que está sujeito a regulamentações ou restrições adicionais. O valor neste campo será 'sim' se o material for controlado e 'não' se não for.
+        data_type: string
+      - name: controlado_tipo
+        description: Este campo fornece informações sobre o tipo de controle aplicado ao material. Dá detalhes mais específicos sobre as regulamentações ou restrições às quais o material está sujeito, se for um material controlado.
+        data_type: string
+      - name: consumo_minimo
+        description: Quantidade mínima do medicamento dispensada para um paciente
+        data_type: int64
+        quote: true
+      - name: abastecimento_responsavel
+        description: Indica quem é o responsável pelo abastecimento do item.
+        data_type: string
+        quote: true
+      - name: abastecimento_frequencia
+        data_type: string
+        quote: true
+        description: Esta coluna representa a frequência de abastecimento do material específico. Fornece informações sobre com que frequência o material é abastecido ou reabastecido.
+      - name: classificacao_xyz
+        description: "Classificação da criticidade do medicamento, onde: X (Críticos): São itens cruciais para o tratamento imediato e eficaz dos pacientes. Sua ausência pode levar a consequências graves para a saúde ou interrupções operacionais; Y (Moderadamente Críticos): Esses itens são importantes, mas não imediatamente ameaçadores à vida. Eles são necessários para operações de rotina, mas podem ser gerenciados por curtos períodos sem impacto severo; Z (Menos Críticos): Esses itens têm a menor criticidade. Sua ausência, embora inconveniente, não impacta severamente o atendimento ao paciente ou as operações da instalação a curto prazo."
+        data_type: string
+        quote: true
+      - name: remume_indicador
+        description: Esta coluna indica se o material está listado na Lista Municipal de Medicamentos Essenciais (REMUME). É um indicador-chave para entender a disponibilidade e regulamentação do material.
+        data_type: string
+      - name: remume_listagem_relacao
+        description: Esta coluna fornece uma lista de todas as listagens REMUME das quais o material faz parte. É útil para entender os diferentes contextos em que o material é considerado essencial.
+        data_type: string
+      - name: remume_listagem_basico_indicador
+        description: Esta coluna indica se o material faz parte da lista "Componentes Básicos" da REMUME.
+        data_type: string
+      - name: remume_listagem_uso_interno_indicador
+        description: Esta coluna indica se o material faz parte da lista "Uso interno nas UAPs" da REMUME.
+        data_type: string
+      - name: remume_listagem_hospitalar_indicador
+        description: Esta coluna indica se o material faz parte da lista "Componentes Hospitalares" da REMUME.
+        data_type: string
+      - name: remume_listagem_estrategico_indicador
+        description: Esta coluna indica se o material faz parte da lista "Componentes Estratégicos" da REMUME.
+        data_type: string
+      - name: remume_disponibilidade_relacao
+        description: Esta coluna fornece informações sobre a disponibilidade do material nos diferentes tipos de unidades de saúde. É um campo de texto que lista os tipos de unidades de saúde onde o material deve estar disponível.
+        data_type: string
+      - name: remume_disponibilidade_cf_cms_cse_indicador
+        description: Esta coluna indica se o material deve estar disponível nos CF (Clínica da Família), CMS (Centro Municipal de Saúde) e CSE (Centro de Saúde Escolar). É um indicador binário com 'sim' indicando que o material deve estar disponível nos CF, CMS e CSE e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_policlinica_indicador
+        description: Esta coluna indica se o material deve estar disponível nas Policlínicas. É um indicador binário com 'sim' indicando que o material deve estar disponível nas Policlínicas e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_hospital_indicador
+        description: >
+          Esta coluna indica se o material deve estar disponível nos Hospitais. É um indicador binário com 'sim' indicando que o material deve estar disponível nos Hospitais e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_maternidade_indicador
+        description: Esta coluna indica se o material deve estar disponível nas Maternidades. É um indicador binário com 'sim' indicando que o material deve estar disponível nas Maternidades e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_caps_indicador
+        description: Esta coluna indica se o material deve estar disponível nos CAPS (Centro de Atenção Psicossocial). É um indicador binário com 'sim' indicando que o material deve estar disponível nos CAPS e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_upa_cer_indicador
+        description: >
+          Esta coluna indica se o material deve estar disponível nas UPAs (Unidades de Pronto Atendimento) e CER (Centros de Especialidades Regionais). É um indicador binário com 'sim' indicando que o material deve estar disponível nas UPAs e CER e 'não' indicando que deve.
+        data_type: string
+      - name: remume_disponibilidade_unidades_especificas_lista
+        description: Esta coluna contém uma lista de unidades específicas onde o material está disponível. A lista é representada pelo CNES de cada unidade separada por vírgula.
+        data_type: string
+      - name: farmacia_popular_disponibilidade_indicador
+        description: Esta coluna indica se o material pode ser obtido através da farmácia popular.
+        data_type: string
+        quote: true
+      - name: cadastrado_sistema_vitacare_indicador
+        description: Esta coluna indica se o material está registrado no Prontuário da Vitacare. É um valor de string que pode ser 'sim' se o material estiver registrado, ou 'não' se não estiver.
+        data_type: string
+      - name: cadastrado_sistema_vitai_indicador
+        description: Esta coluna indica se o material está registrado no Prontuário da Vitacare. É um valor de string que pode ser 'sim' se o material estiver registrado, ou 'não' se não estiver.
+        data_type: string
+  - name: dim_estabelecimento
+    description: Tabela contendo a relação de estabelecimentos de saúde. Informações baseadas no CNES e outras compiladas dentro da SMS.
+    columns:
+      - name: id_unidade
+        description: Código do Estabelecimento de Saúde utlizado no CNES
+        data_type: string
+      - name: id_cnes
+        description: Código Nacional do Estabelecimento de Saúde
+        data_type: string
+        data_tests:
+          - unique:
+              name: core__dim_estabelecimento__id_cnes__unique
+      - name: id_tipo_unidade
+        description: Tipo de Estabelecimento
+        data_type: string
+      - name: area_programatica
+        description: Área programática onde está localizada a unidades de saúde
+        data_type: string
+      - name: cnpj_mantenedora
+        data_type: string
+        quote: true
+      - name: ativa
+        description: Indica se a unidade está ativa ou não
+        data_type: string
+      - name: tipo_sms_agrupado
+        description: Agrupador dos tipos de unidades utilizado dentro da SMS.
+        data_type: string
+        quote: true
+      - name: tipo
+        description: Tipo de Unidade de Saúde segundo a classificação do CNES
+        data_type: string
+      - name: tipo_sms
+        description: Classificação alternativa ao CNES utilizada dentro da SMS para categorizar os tipos de unidades.
+        data_type: string
+      - name: tipo_sms_simplificado
+        description: Classificação alternativa ao CNES de tipos de unidades abreviada
+        data_type: string
+      - name: nome_limpo
+        description: Nome fantasia sem o prefixo indicando o tipo de unidade
+        data_type: string
+      - name: nome_acentuado
+        description: Nome fantasia sem o prefixo indicando o tipo de unidade e com acentuações
+        data_type: string
+      - name: nome_sigla
+        description: Abreviação do nome fantasia
+        data_type: string
+      - name: nome_complemento
+        description: Nome do estabelecimento sem o prefixo indicando o tipo de unidade
+        data_type: string
+      - name: nome_fantasia
+        description: Nome fantasia
+        data_type: string
+      - name: responsavel_sms
+        description: Sub secretaria dentro da SMS-Rio responsável pela unidade
+        data_type: string
+      - name: administracao
+        description: Nome do OSS responsável pela administração. Em caso onde não há OSS, é indicado como direta (administração direta pela SMS-Rio)
+        data_type: string
+      - name: prontuario_tem
+        description: Indica sem a unidade utiliza algum tipo de prontuário, independente se é físico ou eletrônico
+        data_type: string
+      - name: prontuario_versao
+        description: Indica qual sistema de prontuário é utilizado. Em caso de prontuário físico, é indicado como papel.
+        data_type: string
+      - name: prontuario_estoque_tem_dado
+        description: Indica se é esperado chegar dados de estoque (medicamentos e insumos) a partir do cnes desta unidade
+        data_type: string
+      - name: prontuario_estoque_motivo_sem_dado
+        description: Indica o motivo da unidade não utilizar o prontuário para controle de estoque
+        data_type: string
+      - name: prontuario_episodio_tem_dado
+        description: Indica se a unidade se é esperado chegar dados de episódios a partir do cnes desta unidade
+        data_type: string
+      - name: endereco_bairro
+        description: Bairro
+        data_type: string
+      - name: endereco_logradouro
+        description: Logradouro
+        data_type: string
+      - name: endereco_numero
+        description: Número
+        data_type: string
+      - name: endereco_complemento
+        description: Complemento
+        data_type: string
+      - name: endereco_cep
+        description: Código de endereçamento postal (CEP)
+        data_type: string
+      - name: endereco_latitude
+        description: Latitude
+        data_type: float64
+      - name: endereco_longitude
+        description: Longitude
+        data_type: float64
+      - name: telefone
+        description: Telefone para contato
+        data_type: string
+      - name: email
+        description: Email para contato
+        data_type: string
+      - name: facebook
+        description: Handle do Facebook
+        data_type: string
+        quote: true
+      - name: instagram
+        description: Handle do Instagem
+        data_type: string
+        quote: true
+      - name: twitter
+        description: Handle do Twitter
+        data_type: string
+        quote: true
+      - name: aberto_sempre
+        description: "Funcionamento do estabelecimento. Indica se fica sempre aberto / Ininterrupto: S - SIM N - NÃO"
+        data_type: string
+      - name: turno_atendimento
+        description: Descrição do Turno de Atendimento
+        data_type: string
+      - name: atendimento_odonto_indicador
+        description: Indica se o estabelecimento oferece atendimento odontológico
+        data_type: boolean
+      - name: diretor_clinico_cpf
+        description: CPF do Diretor Clínico ou  Gerente / Administrador
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+        data_type: string
+      - name: diretor_clinico_conselho
+        description: Registro no Conselho de Classe do Diretor Clinico
+        policy_tags:
+          - '{{ var ("TAG_CONSELHO_DE_CLASSE") }}'
+        data_type: string
+      - name: data_atualizao_registro
+        description: Data da última atualização do registro
+        data_type: date
+      - name: usuario_atualizador_registro
+        description: Último usuário que atualizou o registro no CNES
+        data_type: string
+      - name: mes_particao
+        description: Mês de referência do registro
+        data_type: string
+      - name: ano_particao
+        description: Ano de referência do registro
+        data_type: string
+        quote: true
+      - name: data_particao
+        description: Data de referência do registro
+        data_type: string
+        quote: true
+      - name: data_carga
+        description: Data de carga do registro
+        data_type: datetime
+      - name: data_snapshot
+        description: Data de snapshot do registro
+        data_type: datetime
+  - name: dim_profissional_saude
+    description: Tabela de profissionais de saúde que já atenderam em unidades do SUS na cidade do Rio de Janeiro
+    columns:
+      - name: id_profissional_sus
+        description: Código SUS do profissional
+        data_type: string
+        data_tests:
+          - unique:
+              name: core__dim_profissional_saude__id_sus__unique
+      - name: cpf
+        description: CPF do profissional
+        data_type: string
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+        data_tests:
+          - unique:
+              name: core__dim_profissional_saude__cpf__unique
+      - name: cns
+        description: Cartão nacional de saúde do profissional
+        data_type: string
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+        data_tests:
+          - unique:
+              name: core__dim_profissional_saude__cns__unique
+      - name: nome
+        description: Nome do profissional de saúde.
+        data_type: string
+        quote: true
+      - name: cbo
+        description: Array de informações de cbo do profissional
+        data_type: array
+      - name: cbo.id_cbo
+        description: ID de CBO associado ao profissional
+        data_type: string
+      - name: cbo.cbo
+        description: Descrição do CBO associado ao profissional
+        data_type: string
+      - name: cbo.cbo_agrupador
+        description: Descrição agrupada do cbo profissional
+        data_type: string
+      - name: cbo.id_cbo_familia
+        description: ID de familia de CBO associado ao CBO
+        data_type: string
+      - name: cbo.cbo_familia
+        description: Descrição de familia de CBO associado ao CBO
+        data_type: string
+      - name: conselho
+        description: Array de informações de conselho relacionadas ao profissional
+        data_type: array
+      - name: conselho.id_registro_conselho
+        description: Número do registro no conselho de classe
+        data_type: string
+        policy_tags:
+          - '{{ var ("TAG_CONSELHO_DE_CLASSE") }}'
+      - name: conselho.id_tipo_conselho
+        description: ID do tipo do conselho de classe
+        data_type: string
+      - name: data_referencia
+        description: Data de última atualização da tabela
+        data_type: date
+      - name: funcionario_ativo_indicador
+        description: Indica se funcionário está com vínculo ativo na SMS. Nulo representa ausência de informação.
+        data_type: boolean
+  - name: dim_vinculo_profissional_saude_estabelecimento
+    description: Tabela de profissionais de saúde alocados hoje em unidades do SUS na cidade do Rio de Janeiro.
+    columns:
+      - name: data_ultima_atualizacao
+        description: Data de ultima atualização do registro
+        data_type: STRING
+      - name: id_cnes
+        description: Identificador do estabelecimento
+        data_type: STRING
+      - name: id_cbo
+        description: Id da especialidade do profissional
+        data_type: STRING
+      - name: cbo_nome
+        description: Descrição da especialidade do profissional
+        data_type: STRING
+      - name: cbo_agrupador
+        description: Descrição agrupada do cbo profissional
+        data_type: STRING
+      - name: id_cbo_familia
+        description: Id da família de especialidade do profissional
+        data_type: STRING
+      - name: cbo_familia_nome
+        description: Descrição da familia de especialidade do profissional
+        data_type: STRING
+      - name: profissional_nome
+        description: Nome do profissional
+        data_type: STRING
+        policy_tags:
+          - '{{ var ("TAG_NOME") }}'
+      - name: profissional_cns
+        description: Cartão nacional de saúde do profissional
+        data_type: STRING
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+      - name: id_profissional_sus
+        description: Código SUS do profissional
+        data_type: STRING
+      - name: vinculacao
+        description: Vinculação do profissional
+        data_type: STRING
+      - name: vinculo_tipo
+        description: Tipo de vinculo do profissional
+        data_type: STRING
+      - name: carga_horaria_outros
+        description: Carga horária não ambulatorial, nem hospitalar
+        data_type: INT64
+      - name: carga_horaria_hospitalar
+        description: Carga horária hospitalar
+        data_type: INT64
+      - name: carga_horaria_ambulatorial
+        description: Carga horária ambulatorial
+        data_type: INT64
+      - name: id_registro_conselho
+        description: Número do registro no conselho de classe
+        data_type: STRING
+        policy_tags:
+          - '{{ var ("TAG_CONSELHO_DE_CLASSE") }}'
+      - name: id_tipo_conselho
+        description: Tipo do conselho de classe
+        data_type: STRING
+  - name: dim_equipe
+    description: Tabela contendo a relação de equipes dentro dos estabelecimentos de saúde. Informações baseadas no CNES e outras compiladas dentro da SMS.
+    columns:
+      - name: id_ine
+        description: Código da Equipe (Identificador Nacional de Equipe - INE)
+        data_tests:
+          - unique:
+              name: core__dim_equipe__id_ine__unique
+      - name: equipe_sequencial
+        description: Sequencial da Equipe
+      - name: id_area
+        description: Código da Área da Equipe
+      - name: area_descricao
+        description: Descrição da Área da Equipe
+      - name: nome_referencia
+        description: Nome de Referência da Equipe
+      - name: telefone
+        description: Whatsapp da equipe
+      - name: id_equipe_tipo
+        description: Código do tipo de equipe
+      - name: equipe_tipo_descricao
+        description: Descrição do tipo de equipe
+      - name: id_cnes
+        description: Código CNES do Estabelecimento de Saúde
+      - name: profissionais
+        description: Array de profissionais pertencentes a equipe
+      - name: ultima_atualizacao_infos_equipe
+        description: Data de ultima atualização de informações da equipe
+      - name: ultima_atualizacao_profissionais
+        description: Data de ultima atualização da lista de profissionais da equipe
+      - name: medicos
+        description: Código SUS dos médicos atribuidos a equipe
+      - name: enfermeiros
+        description: Código SUS dos enfermeiros atribuidos a equipe
+      - name: auxiliares_tecnicos_enfermagem
+        description: Código SUS dos auxiliares ou técnicos de enfermagem atribuidos a equipe
+      - name: agentes_comunitarios
+        description: Código SUS dos agentes comunitários atribuidos a equipe
+      - name: auxiliares_tecnico_saude_bucal
+        description: Código SUS dos auxiliares ou técnicos de saúde bucal atribuidos a equipe
+      - name: dentista
+        description: Código SUS dos dentistas atribuidos a equipe
+      - name: outros_profissionais
+        description: Código SUS dos outros profissionais atribuidos a equipe
+  - name: dim_condicao_cid10
+    description: Tabela contendo a Classificação Internacional de Doenças (CID-10).
+    columns:
+      - name: id
+        description: Identificação da subcategoria do CID.
+        data_type: string
+        data_tests:
+          - unique:
+              name: dim_condicao_cid10__id__unique
+      - name: descricao
+        description: Descrição do nome da subcategoria do CID.
+        data_type: string
+      - name: ordem
+        description: Ordenação dos CIDs usada para facilitar ranges. Como "Entre A00 e B86".
+        data_type: int64
+      - name: categoria
+        description: Categoria relacionada.
+        data_type: string
+      - name: categoria.id
+        description: Identificador da categoria.
+        data_type: string
+      - name: categoria.descricao
+        description: Descrição do nome da categoria do CID.
+        data_type: string
+      - name: categoria.abreviatura
+        description: Descrição abreviada do nome da categoria do CID.
+      - name: capitulo
+        description: Capítulo relacionado.
+        data_type: string
+      - name: capitulo.id
+        description: Identificador do capítulo relacionado.
+        data_type: string
+      - name: capitulo.descricao
+        description: Descrição do nome do capítulo do CID.
+        data_type: string
+      - name: grupo
+        description: Grupos relacionado. Um CID pode pertencer a mais de um grupo.
+        data_type: string
+      - name: grupo.descricao
+        description: Descrição do nome do grupo do CID.
+      - name: grupo.abreviatura
+        description: Descrição abreviada do nome do grupo do CID. Um CID pode pertencer a mais de um grupo.
+      - name: grupo.comprimento
+        description: Quantidade de caracteres do nome do grupo.
+        data_type: int64
+  - name: dim_estabelecimento_bairro_ap
+    description: "Tabela contendo todos os estabelecimentos do MRJ com vínculo com o SUS, seus respectivos bairros e áreas programáticas."
+    columns:
+      - name: id_cnes
+        description: "Identificador único de cada estabelecimento de saúde conforme o CNES."
+        data_tests:
+          - unique 
+          - not_null
+        data_type: string
+        quote: true
+      - name: bairro
+        description: "Bairro onde o estabelecimento de saúde está localizado."
+        data_type: string
+        quote: true
+      - name: ap
+        description: "Código da área programática onde o estabelecimento de saúde está localizado."
+        data_type: int64
+        quote: true
+      - name: ap_titulo
+        description: "Título (descrição) da área programática onde o estabelecimento de saúde está localizado."
+        data_type: string
+        quote: true

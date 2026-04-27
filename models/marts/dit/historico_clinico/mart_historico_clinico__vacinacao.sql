@@ -1,0 +1,85 @@
+{{
+    config(
+        schema="saude_historico_clinico",
+        alias="vacinacao",
+        materialized="table",
+        partition_by={
+            "field": "cpf_particao",
+            "data_type": "int64",
+            "range": {"start": 0, "end": 100000000000, "interval": 34722222},
+        },
+    )
+}}
+
+
+with
+    vacinacoes as (
+        select *, 'historico' as origem
+        from {{ ref("int_historico_clinico__vacinacao__historico") }}
+        union all
+        select *, 'api' as origem
+        from {{ ref("int_historico_clinico__vacinacao__api") }}
+        union all
+        select *, 'continuo' as origem
+        from {{ ref("int_historico_clinico__vacinacao__continuo") }}
+        union all
+        select *, 'sipni' as origem
+        from {{ ref("int_historico_clinico__vacinacao__sipni") }}
+    ),
+
+    vacinacoes_dedup as (
+        select *
+        from vacinacoes
+        qualify row_number() over (
+            partition by id_vacinacao 
+            order by 
+                case 
+                    when origem = 'api' then 1 
+                    when origem = 'historico' then 2 
+                    when origem = 'sipni' then 3
+                    else 4
+                end
+        ) = 1
+    ),
+
+    final as (
+        select
+            id_vacinacao,
+            id_cnes,
+            id_equipe,
+            id_ine_equipe,
+            id_microarea,
+            paciente_id_prontuario,
+            paciente_cns,
+            paciente_cpf,
+            estabelecimento_nome,
+            equipe_nome,
+            profissional_nome,
+            profissional_cbo,
+            profissional_cns,
+            profissional_cpf,
+            vacina_descricao,
+            vacina_dose,
+            vacina_lote,
+            vacina_registro_tipo,
+            vacina_estrategia,
+            vacina_diff,
+            vacina_aplicacao_data,
+            vacina_registro_data,
+            paciente_nome,
+            paciente_sexo,
+            paciente_nascimento_data,
+            paciente_nome_mae,
+            paciente_mae_nascimento_data,
+            paciente_situacao,
+            paciente_cadastro_data,
+            paciente_obito,
+            loaded_at,
+            origem,
+            safe_cast(paciente_cpf as int64) as cpf_particao
+        from vacinacoes_dedup
+    )
+
+select *
+from final
+

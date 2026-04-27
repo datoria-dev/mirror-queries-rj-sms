@@ -1,0 +1,1077 @@
+version: 2
+models:
+  - name: mart_historico_clinico__episodio
+    description: >
+      Tabela com uma visão consolidada dos atendimentos realizados em
+      estabelecimentos de saúde.
+    columns:
+      - name: paciente_cpf
+        description: >
+          Cadastro de Pessoas Físicas do paciente.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+        tests:
+          - assert_relacionamento_tabelas:
+              name: mart_historico_clinico__episodio__cpf__10_pct_fora_tabela_pacientes
+              to: ref('mart_historico_clinico__paciente')
+              field: cpf
+              config:
+                fail_calc: response
+                severity: error
+                error_if: "= 2"
+                warn_if: "= 1"
+      - name: cadastros_conflitantes_indicador
+        description:
+          Flag que informa se o CPF possui cadastros conflitantes, ou seja, um CPF que possui informações de mais de uma pessoa
+      - name: id_hci
+        description: |
+          Fingerprint determinístico para o atendimento.
+        data_tests:
+          - not_null:
+              name: mart_historico_clinico__episodio__id_episodio__not_null
+              config:
+                severity: warn
+                warn_if: ">1000"
+          - unique:
+              name: mart_historico_clinico__episodio__id_episodio__unique
+              config:
+                severity: warn
+                warn_if: ">1000"
+      - name: paciente
+        description: >
+          Informações sobre os pacientes envolvidos no atendimento, incluindo
+          CPF e CNS. Agrupados por identificador de prontuário.
+      - name: paciente.id_paciente
+        description: |
+          Identificador global do paciente usado para anonimizar o campo cpf.
+      - name: paciente.cpf
+        description: |
+          CPF do paciente.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+      - name: paciente.cns
+        description: |
+          CNS do paciente.
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+      - name: paciente.data_nascimento
+        description: |
+          Data de nascimento do paciente.
+        policy_tags:
+          - '{{ var ("TAG_DATA_NASCIMENTO") }}'
+      - name: tipo
+        description: >
+          Tipo de atendimento classificado como 'Exames', 'Consulta' ou
+          'Internação', baseado no tipo de atendimento informado no boletim.
+      - name: subtipo
+        description: >
+          Subtipo do atendimento, obtido a partir do tipo de atendimento do
+          boletim. 
+      - name: entrada
+        description: >
+          Data de início do atendimento.
+      - name: entrada_data
+        description: >
+          Data de início do atendimento.
+      - name: entrada_datahora
+        description: >
+          Data e hora de início do atendimento. Representa o momento em que o
+          atendimento começou.
+      - name: saida_datahora
+        description: >
+          Data e hora de término do atendimento. Representa o momento em que o
+          atendimento terminou.
+      - name: exames_realizados
+        description: >
+          Lista de exames realizados durante o atendimento.
+      - name: exames_realizados.tipo
+        description: >
+          Tipo do exame realizado.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: exames_realizados.descricao
+        description: >
+          Descrição do exame realizado.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: motivo_atendimento
+        description: >
+          Motivo do atendimento, obtido a partir do boletim de atendimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: desfecho_atendimento
+        description: >
+          Desfecho do atendimento, obtido a partir do boletim de atendimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas
+        description: >
+          Medidas aferidas durante o episódio.
+      - name: medidas.altura
+        description: |
+          Altura do paciente em centímetros (cm).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.circunferencia_abdominal
+        description: |
+          Circunferência abdominal do paciente em centímetros (cm).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.frequencia_cardiaca
+        description: |
+          Frequência cardíaca do paciente em batimentos por minuto (bpm).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.frequencia_respiratoria
+        description: |
+          Frequência respiratória do paciente em respirações por minuto (rpm).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.glicemia
+        description: |
+          Glicemia em jejumdo paciente em miligramas por decilitro (mg/dl).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.hemoglobina_glicada
+        description: |
+          Hemoglobina glicada A1c (HbA1c) do paciente em percentuais (%).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.imc
+        description: |
+          Índice de Massa Corporal do paciente em quilogramas por metro quadrado (kg/m²).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.peso
+        description: |
+          Peso do paciente em quilogramas (kg).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.pressao_sistolica
+        description: |
+          Pressão arterial sistólica do paciente em milímetros de mercúrio (mmHg).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.pressao_diastolica
+        description: |
+          Pressão arterial diastólica do paciente em milímetros de mercúrio (mmHg).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.pulso_ritmo
+        description: |
+          Ritmo cardíaco do paciente. O valor pode ser 'filiforme', 'arritmico', 'ritmico cheio' ou 'ritmico debil'.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.saturacao_oxigenio
+        description: |
+          Saturação de oxigênio do paciente em percentuais (%).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: medidas.temperatura
+        description: |
+          Temperatura do paciente em graus Celsius (°C).
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: procedimentos_realizados
+        description: >
+          Procedimentos realizados durante o episódio.
+      - name: procedimentos_realizados.descricao
+        description: >
+          Descrição do tipo de procedimento realizado durante o episódio.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: procedimentos_realizados.observacao
+        description: >
+          Campo aberto de observações referentes ao procedimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: obito_indicador
+        description: Indica se o paciente foi a óbito no atendimento.
+      - name: condicoes
+        description: >
+          Códigos e descrições dos CID (Classificação Internacional de Doenças)
+          relacionados ao atendimento. 
+      - name: condicoes.relacao
+        description: |
+          Lista de cids associados ao atendimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: condicoes.id
+        description: |
+          Código CID ativo
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: condicoes.descricao
+        description: |
+          Descrição do CID associado ao atendimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: condicoes.situacao
+        description: |
+          Situação do CID associado ao atendimento. Pode assumir os valores "ATIVO", "NAO ESPECIFICADO" OU "RESOLVIDO"
+      - name: condicoes.data_diagnostico
+        description: |
+          Data do diagnóstico da condição na Atenção Primária. Para a UPAs e Hospitais, este campo é vazio.
+      - name: condicoes.resumo
+        description: |
+          Descreve de forma resumida os cids marcados como "Ativos" ou "Não especificados"
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: prescricoes
+        description: >
+          Informações sobre as medicações prescritas durante o atendimento.
+      - name: prescricoes.id
+        description: |
+          ID do medicamento prescrito.
+      - name: prescricoes.nome
+        description: |
+          Nome do medicamento prescrito.
+      - name: prescricoes.concentracao
+        description: |
+          Concentração do medicamento prescrito.
+      - name: prescricoes.uso_continuo
+        description: >
+          Indica se o medicamento prescrito é de uso contínuo.
+      - name: medicamentos_administrados
+        description: >
+          Informações sobre as medicações administradas durante o atendimento.
+      - name: medicamentos_administrados.nome
+        description: |
+          Nome do medicamento administrado.
+      - name: medicamentos_administrados.quantidade
+        description: |
+          Quantidade administrada do medicamento.
+      - name: medicamentos_administrados.unidade_medida
+        description: |
+          Unidade em que esta medido o campo de quantidade.
+      - name: medicamentos_administrados.uso
+        description: >
+          Indica como é feito o uso do medicamento administrado.
+      - name: medicamentos_administrados.via_administracao
+        description: >
+          Indica qual via é feita a administração do medicamento.
+      - name: medicamentos_administrados.prescricao_data
+        description: >
+          Indica qual data foi prescrito o medicamento a ser administrado.
+      - name: estabelecimento
+        description: >
+          Informações sobre o estabelecimento de saúde onde o atendimento foi
+          realizado, incluindo CNES, nome e sigla.
+      - name: estabelecimento.id_cnes
+        description: |
+          CNES do estabelecimento onde ocorreu o atendimento
+      - name: estabelecimento.nome
+        description: |
+          Nome do estabelecimento onde ocorreu o atendimento
+      - name: estabelecimento.estabelecimento_tipo
+        description: |
+          Tipo do estabelecimento onde ocorreu o atendimento
+      - name: profissional_saude_responsavel
+        description: >
+          Dados dos profissionais de saúde responsáveis pelo atendimento,
+          incluindo CPF, CNS e nome.
+      - name: profissional_saude_responsavel.id
+        description: |
+          ID do profissional responsável pelo atendimento.
+        policy_tags:
+          - '{{ var ("TAG_IDENTIFICADOR_SISTEMA") }}'
+      - name: profissional_saude_responsavel.cns
+        description: |
+          CNS do profissional responsável pelo atendimento.
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+      - name: profissional_saude_responsavel.nome
+        description: |
+          Nome do profissional responsável pelo atendimento.
+        policy_tags:
+          - '{{ var ("TAG_NOME") }}'
+      - name: profissional_saude_responsavel.cpf
+        description: |
+          CPF do profissional responsável pelo atendimento.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+      - name: profissional_saude_responsavel.especialidade
+        description: |
+          Especialidade do profissional responsável pelo atendimento.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: prontuario
+        description: >
+          Informações adicionais sobre o atendimento, como o fornecedor e o
+          identificador do atendimento.
+      - name: prontuario.id_prontuario_global
+        description: |
+          ID do atendimento.
+      - name: prontuario.fornecedor
+        description: |
+          Fornecedor do prontuário.
+      - name: metadados
+        description: |
+          Metadados do registro
+      - name: metadados.updated_at
+        description: |
+          Data de última atualização.
+      - name: metadados.imported_at
+        description: |
+          Data de importação para o datalake
+      - name: metadados.processed_at
+        description: |
+          Data de processamento do registro
+      - name: exibicao
+        description: >
+          Indica se o episódio deve ser exibido na interface do usuário.
+      - name: exibicao.indicador
+        description: |
+          Flag que indica se o episodio é relevante para a aplicação do HCI
+      - name: exibicao.motivos
+        description: |
+          Motivos pelos quais o episódio foi marcado para ter a exibição suprimida
+      - name: data_particao
+        description: >
+          Campo utilizado para particionamento de dados através da data de entrada do episódio.
+  - name: mart_historico_clinico__alergia
+    description: >
+      Este modelo agrega informações sobre alergias dos pacientes e combina
+      essas informações com dados identificadores dos pacientes como `cns` e
+      `cpf`. Ele realiza a limpeza e padronização dos dados de alergias e
+      garante que os identificadores dos pacientes sejam consistentes e
+      precisos.
+    columns:
+      - name: paciente_cpf
+        description: |
+          Cadastro de Pessoas Físicas do paciente.
+        data_tests:
+          - unique:
+              name: mart_historico_clinico__alergia__paciente_cpf__unique
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+      - name: alergias
+        description: >
+          Lista de alergias do paciente, agregada a partir dos registros
+          individuais. As alergias são limpadas e padronizadas, e a lista contém
+          apenas valores distintos.
+        data_tests:
+          - not_null:
+              name: mart_historico_clinico__alergia__array_alergias__not_null
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: metadados
+        description: Metadados do registro
+      - name: metadados.processed_at
+        description: Marcação de data/hora de processamento do registro no formato UTC,
+          seguindo o padrão 'AAAA-MM-DD HH:MM:SS'.
+      - name: cpf_particao
+        description: >
+          Campo utilizado para particionamento de dados através do CPF. Valor representado em inteiro.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+  - name: mart_historico_clinico__paciente
+    description: "O modelo é um registro abrangente do histórico do paciente que
+      integra dados de várias fontes, incluindo 'VITACARE', 'VITAI' e 'SMSRIO'.
+      "
+    columns:
+      - name: cpf
+        description: CPF do paciente
+        data_type: string
+        quote: true
+        data_tests:
+          - not_null:
+              name: mart_historico_clinico__paciente__cpf__not_null
+          - unique:
+              name: mart_historico_clinico__paciente__cpf__unique
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+      - name: cns
+        description: ARRAY contendo todos os números do Cartão Nacional de Saúde
+          associados ao paciente. Este número é usado pelo Ministério da Saúde
+          do Brasil para rastrear os serviços de saúde que um paciente recebe. O
+          CNS é um identificador único para um paciente e é usado em conjunto
+          com o campo 'cpf' para garantir o rastreamento preciso do paciente.
+        data_type: string
+        quote: true
+        policy_tags:
+          - '{{ var ("TAG_CNS") }}'
+      - name: cadastros_conflitantes_indicador
+        description:
+          Flag que informa se o CPF possui cadastros conflitantes, ou seja, um CPF que possui informações de mais de uma pessoa
+        data_type: bool
+      - name: dados
+        description: STRUCT contendo uma variedade de
+          subcampos relacionados às informações pessoais e demográficas do paciente.
+        data_type: record
+        quote: true
+      - name: dados.nome
+        description: Nome de registro.
+        data_tests:
+          - not_null:
+              name: mart_historico_clinico__paciente__nome__not_null
+        policy_tags:
+          - '{{ var ("TAG_NOME") }}'
+      - name: dados.id_paciente
+        description: Identificador global do paciente usado para anonimizar o campo cpf.
+      - name: dados.nome_social
+        description: Nome social.
+        policy_tags:
+          - '{{ var ("TAG_NOME") }}'
+      - name: dados.data_nascimento
+        description: Data de nascimento.
+        policy_tags:
+          - '{{ var ("TAG_DATA_NASCIMENTO") }}'
+      - name: dados.genero
+        description: "Gênero do paciente. Os valores possíveis são 'Masculino',
+          'Feminino' e nulo (não informado)."
+      - name: dados.raca
+        description: "Raça do paciente. Os valores possíveis são 'Amarela','Branca', 'Indigena', 'Parda', 'Preta' e nulo (não informado)."
+      - name: dados.obito_indicador
+        description: Indica se o paciente é falecido ou não.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: dados.obito_data
+        description: Indica a data de falecimento do paciente.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: dados.mae_nome
+        description: Nome da mãe do paciente.
+        policy_tags:
+          - '{{ var ("TAG_NOME_MAE") }}'
+      - name: dados.pai_nome
+        description: Nome do pai do paciente. A ausência de um valor neste campo não significa
+          necessariamente que o pai do paciente seja desconhecido, mas sim que
+          o valor não foi fornecido.
+        policy_tags:
+          - '{{ var ("TAG_NOME_PAI") }}'
+      - name: dados.identidade_validada_indicador
+        description: Indica se a identidade do paciente foi validada em alguma base federal.
+      - name: dados.cpf_valido_indicador
+        description: Indica se o CPF do paciente é válido.
+      - name: equipe_saude_familia
+        description: Array contendo todas as equipes de saúde da família
+          nas quais o paciente está atualmente associado. As equipes são ordenadas de acordo
+          com a data de associação/atualização mais recente.
+        data_type: record
+        quote: true
+      - name: equipe_saude_familia.id_ine
+        description: Identificador da equipe de saúde da família.
+      - name: equipe_saude_familia.nome
+        description: Nome da equipe de saúde da família.
+      - name: equipe_saude_familia.telefone
+        description: Telefone para contato com a equipe de saúde da família.
+      - name: equipe_saude_familia.cnes
+        description: CNES (Cadastro Nacional de Estabelecimentos de Saúde) da equipe.
+      - name: equipe_saude_familia.medicos
+        description: Relação de médicos da equipe de saúde da família.
+      - name: equipe_saude_familia.medicos.id_profissional_sus
+        description: Identificador do profissional de saúde no CNES.
+      - name: equipe_saude_familia.medicos.nome
+        description: Nome do profissional de saúde.
+      - name: equipe_saude_familia.enfermeiros
+        description: Relação de enfermeiros da equipe de saúde da família.
+      - name: equipe_saude_familia.enfermeiros.id_profissional_sus
+        description: Identificador do profissional de saúde no CNES.
+      - name: equipe_saude_familia.enfermeiros.nome
+        description: Nome do profissional de saúde.
+      - name: equipe_saude_familia.clinica_familia
+        description: Nome da clínica da família.
+      - name: equipe_saude_familia.id_profissional
+        description: Identificador do profissional de saúde.
+      - name: equipe_saude_familia.clinica_familia
+        description: Relação informações sobre a clínica da família associada à equipe.
+      - name: equipe_saude_familia.clinica_familia.id_cnes
+        description: CNES da clínica da família.
+      - name: equipe_saude_familia.clinica_familia.nome
+        description: Nome da clínica da família.
+      - name: equipe_saude_familia.clinica_familia.telefone
+        description: Telefone para contato com a clínica da família.
+      - name: equipe_saude_familia.datahora_ultima_atualizacao
+        description: Data e hora da última atualização da equipe de saúde da família.
+      - name: equipe_saude_familia.rank
+        description: "Indica a ordem de associação da equipe de saúde da família. O critério
+          de ordenação é baseado na data de associação/atualização (campo: 'datahora_ultima_atualizacao') mais recente."
+      - name: contato
+        description: STRUCT contendo informações de contato para
+          o paciente. Inclui números de telefone e endereços de e-mail
+          registrados nos sistemas SMS RIO, VITAI e VITACARE.
+        data_type: record
+        quote: true
+      - name: saude_mental
+        description: Informações sobre acompanhamento do paciente em unidade de saúde mental (caso possua).
+      - name: saude_mental.id_pcsm
+        description: Identificador do paciente no Prontuário Carioca de Saúde saude_mental
+      - name: saude_mental.status_acompanhamento
+        description: Status do acompanhamento do paciente.
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: saude_mental.nome_unidade
+        description: Nome da unidade de saúde em que o paciente está vinculado.
+      - name: saude_mental.cnes
+        description: CNES da unidade de saúde em que o paciente está vinculado.
+      - name: saude_mental.telefones
+        data_type: string[]
+        description: Contatos institucionais da unidade de saúde em que o paciente está vinculado.
+      - name: contato.telefone
+        description: "ARRAY contendo os números de telefone ordenados. O 
+          critério de ordenação é pelos cadastros pelo ACS na atenção primária 
+          (Vitacare), em seguida pelos informados para Regulação na plataforma 
+          SMS RIO, e por último os informados nas UPAs e Hospitais VITAI."
+      - name: contato.telefone.valor
+        description: Número de telefone.
+        policy_tags:
+          - '{{ var ("TAG_TELEFONE") }}'
+      - name: contato.telefone.sistema
+        description: Sistema de origem do número de telefone.
+      - name: contato.telefone.rank
+        description: "Ranking do telefone." 
+      - name: contato.email
+        description:  "ARRAY contendo os emails ordenados. O 
+          critério de ordenação é pelos cadastros pelo ACS na atenção primária 
+          (Vitacare), em seguida pelos informados para Regulação na plataforma 
+          SMS RIO, e por último os informados nas UPAs e Hospitais VITAI."
+      - name: contato.email.valor
+        description: Número de email.
+        policy_tags:
+          - '{{ var ("TAG_EMAIL") }}'
+      - name: contato.email.sistema
+        description: Sistema de origem do número de email.
+      - name: contato.email.rank
+        description: "Ranking do email." 
+      - name: endereco
+        description: Esta coluna é do tipo registro e contém informações de todos os endereços
+          informados em algumas unidade de saúde da rede.
+        data_type: record
+        quote: true
+      - name: endereco.cep
+        description: Código postal (CEP) do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.tipo_logradouro
+        description: Tipo de logradouro. 
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.logradouro
+        description: Nome da rua/avenida/etc.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.numero
+        description: Número do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.complemento
+        description: Complemento do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.bairro
+        description: Bairro do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.cidade
+        description: Município do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.estado
+        description: Unidade federativa (estado) do endereço.
+        policy_tags:
+          - '{{ var ("TAG_ENDERECO") }}'
+      - name: endereco.datahora_ultima_atualizacao
+        description: Data e hora da última atualização do endereço.
+      - name: endereco.sistema
+        description: Sistema de origem do endereço.
+      - name: endereco.rank
+        description: "Rank do endereço."
+      - name: prontuario
+        description: STRUCT contendo a relação de sistemas
+          onde há registro do paciente.
+        data_type: record
+        quote: true
+      - name: prontuario.sistema
+        description: Sistema de onde os dados foram obtidos.
+      - name: prontuario.id_cnes
+        description: Identificador único da unidade de saúde para os casos onde
+          o sistema de origem é um prontuário eletrônico.
+      - name: prontuario.id_paciente
+        description: Identificador único do paciente no sistema de origem.
+        policy_tags:
+          - '{{ var ("TAG_IDENTIFICADOR_SISTEMA") }}'
+      - name: prontuario.rank
+        description: "Ordenação do prontuário no array."
+      - name: metadados
+        description: STRUCT contendo metadados sobre o registro do paciente.
+        data_type: record
+        quote: true
+      - name: metadados.processed_at
+        description: Marcação de data/hora de processamento do registro no formato UTC,
+          seguindo o padrão 'AAAA-MM-DD HH:MM:SS'.
+      - name: cpf_particao
+        description: >
+          Campo utilizado para particionamento de dados através do CPF. Valor representado em inteiro.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__medicamento_cronico
+    description: "Tabela contendo os medicamentos de uso contínuo prescrito para o paciente
+    nos últimos 12 meses."
+    columns:
+      - name: paciente_cpf
+        description: CPF do paciente.
+        data_type: string
+        data_tests:
+          - unique:
+              name: mart_historico_clinico__medicamentos__paciente_cpf__unique
+          - not_null:
+              name: mart_historico_clinico__medicamentos__paciente_cpf__not_null
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+      - name: medicamentos
+        description: Array contendo todos os medicamentos de uso contínuo prescritos nos últimos 12 meses.
+        data_type: string
+      - name: medicamentos.id
+        description: Código de identificação do medicamento.
+        data_type: string
+      - name: medicamentos.nome
+        description: Nome do medicamento.
+        data_type: string
+      - name: medicamentos.concentracao
+        description: Concentração do medicamento prescrito.
+        data_type: string
+      - name: medicamentos.datahora_prescricao
+        description: Data hora da prescricao do medicamento.
+        data_type: string
+      - name: metadados
+        description: Metadados do registro
+      - name: metadados.processed_at
+        description: Marcação de data/hora de processamento do registro no formato UTC,
+          seguindo o padrão 'AAAA-MM-DD HH:MM:SS'.
+      - name: data_particao
+        description: >
+          Campo utilizado para particionamento de dados através da data do evento.
+      - name: cpf_particao
+        description: >
+          Campo utilizado para particionamento de dados através do CPF. Valor representado em inteiro.
+        policy_tags:
+          - '{{ var ("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__vacinacao
+    columns:
+      - name: id_vacinacao
+        description: Identificador único da vacinação, composto por id_cnes e id local.
+        data_type: string
+        data_tests:
+          - unique:
+              name: mart_historico_clinico__vacinacao__id_vacinacao__unique
+              config:
+                severity: warn
+      - name: id_cnes
+        description: Identificador CNES do estabelecimento de saúde onde a vacina foi administrada.
+        data_type: string
+
+      - name: id_equipe
+        description: Identificador da equipe de saúde responsável pelo paciente.
+        data_type: string
+
+      - name: id_ine_equipe
+        description: Identificador INE da equipe de saúde conforme o CNES.
+        data_type: string
+
+      - name: id_microarea
+        description: Identificador da microárea de atuação da equipe de saúde.
+        data_type: string
+
+      - name: paciente_id_prontuario
+        description: Identificador do prontuário do paciente na unidade.
+        data_type: string
+
+      - name: paciente_cns
+        description: CNS (Cartão Nacional de Saúde) do paciente.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+
+      - name: paciente_cpf
+        description: CPF do paciente.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+      - name: estabelecimento_nome
+        description: Nome do estabelecimento de saúde.
+        data_type: string
+
+      - name: equipe_nome
+        description: Nome da equipe de saúde vinculada.
+        data_type: string
+
+      - name: profissional_nome
+        description: Nome do profissional de saúde que registrou a vacina.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+
+      - name: profissional_cbo
+        description: Código CBO do profissional.
+        data_type: string
+
+      - name: profissional_cns
+        description: CNS do profissional.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+
+      - name: profissional_cpf
+        description: CPF do profissional.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+      - name: vacina_descricao
+        description: Descrição da vacina administrada.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_DADO_CLINICO") }}'
+
+      - name: vacina_dose
+        description: Dose da vacina (exemplo 1ª, 2ª, reforço).
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_DADO_CLINICO") }}'
+
+      - name: vacina_lote
+        description: Número do lote da vacina.
+        data_type: string
+
+      - name: vacina_registro_tipo
+        description: Tipo de registro da vacina (exemplo normal, retroativo).
+        data_type: string
+
+      - name: vacina_estrategia
+        description: Estratégia de vacinação utilizada.
+        data_type: string
+
+      - name: vacina_diff
+        description: Diferença (em dias) entre data de aplicação e registro.
+        data_type: string
+
+      - name: vacina_aplicacao_data
+        description: Data de aplicação da vacina.
+        data_type: date
+
+      - name: vacina_registro_data
+        description: Data/hora em que o registro da vacina foi efetivado no sistema.
+        data_type: date
+        data_tests:
+          - not_null:
+              name: mart_historico_clinico__vacinacao__vacina_registro_data__not_null
+              config:
+                severity: warn
+
+      - name: paciente_nome
+        description: Nome do paciente vacinado.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+
+      - name: paciente_sexo
+        description: Sexo do paciente.
+        data_type: string
+
+      - name: paciente_nascimento_data
+        description: Data de nascimento do paciente.
+        data_type: date
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+
+      - name: paciente_nome_mae
+        description: Nome da mãe do paciente.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_NOME_MAE") }}'
+
+      - name: paciente_mae_nascimento_data
+        description: Data de nascimento da mãe do paciente.
+        data_type: date
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+
+      - name: paciente_situacao
+        description: Situação atual do paciente no sistema (ativo, inativo, etc.).
+        data_type: string
+
+      - name: paciente_cadastro_data
+        description: Data de cadastro do paciente no sistema.
+        data_type: date
+
+      - name: paciente_obito
+        description: Indicador de óbito do paciente.
+        data_type: string
+        policy_tags:
+          - '{{ var("TAG_DADO_CLINICO") }}'
+
+      - name: loaded_at
+        description: Data/hora de carga no Data Lake.
+        data_type: datetime
+
+      - name: origem
+        description: Fonte dos dados.
+        data_type: string
+
+      - name: cpf_particao
+        description: CPF do paciente convertido para inteiro para fins de partição.
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__ficha_c
+    description: >
+      Modelo contendo dados de pacientes atendidos pela atenção primária, incluindo informações demográficas, de saúde, socioeconômicas do cadastro infantil.
+    columns:
+      - name: cpf
+        description: "CPF do paciente"
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: vacinas_em_dia
+        description: "Indicador de vacinas em dia (S/N)"
+      - name: primeira_cons_7_dias
+        description: "Indicador se primeira consulta foi realizada com 7 dias de nascido (S/N)"
+      - name: estado_nutricional
+        description: "Registro de estado nutricional atualizado"
+      - name: tipo_de_aleitamento
+        description: "Indicador do tipo de aleitamento infantil"
+      - name: atraso_desenvolvimento
+        description: "Indicador de atraso no desenvolvimento infantil (S/N)"
+      - name: sinais_risco
+        description: "Indicador de sinais de riscos à criança(S/N)"
+      - name: diarreia
+        description: "Indicador de sintomas de diarreia (S/N)"
+      - name: infeccao_respirat_aguda
+        description: "Indicador de sintomas de infecção respiratória aguda (S/N)"
+      - name: estatura_ao_nascer
+        description: "Registro de estatura ao nascer"
+      - name: per_cefalico
+        description: "Perímetro cefálico"
+      - name: data_acs_visita
+        description: "Data de realização da visita domiciliar realizada pelo agente comunitário de saúde"
+      - name: cpf_particao
+        description: "CPF do paciente convertido para inteiro para fins de partição"
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__exame_imagem
+    description: Tabela contendo informações detalhadas sobre os exames de imagem realizados
+    columns:
+      - name: unidade_cnes
+        description: Código CNES da unidade em que o exame foi realizado.
+      - name: unidade_nome
+        description: Nome da unidade em que o exame foi realizado.
+      - name: id_laudo
+        description: Código único que identifica o laudo.
+      - name: laudo_bucket
+        description: endereço do arquivo pdf armazenado no gcs
+      - name: id_exame
+        description: Código único da solicitação de exame, que permite integrar com SISREG
+      - name: laudo_data_atualizacao
+        description: Data e hora que o laudo é finalizado ou atualizado (incluindo atualizações referentes a inclusão de adendo)
+      - name: medico_requisitante
+        description: Nome do(a) médico(a) que prescreveu o exame ao paciente
+      - name: medico_responsavel
+        description: Nome do(a) médico(a) que realizou o laudo.
+      - name: medico_revisor
+        description: Nome do(a) médico(a) revisor(a), quando houver.
+      - name: paciente_cpf
+        description: CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: exame_data
+        description: Data e Hora da Realização do Exame
+      - name: exame_nome
+        description: Nome Detalhado do Exame
+      - name: exame_codigo_sigtap
+        description: Código SIGTAP do Exame
+      - name: cpf_particao
+        description: Particionamento pelo CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__exame_laboratorial
+    description: Exames laboratoriais realizados
+    columns:
+      - name: unidade_nome
+        description: Nome da unidade em que o exame foi realizado.
+      - name: paciente_cpf
+        description: CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: exames
+        description: Informações sobre os exames em um mesmo laudo
+      - name: exames.descricao
+        description: >
+          Descrição do exame (ex.: "HEMOGLOBINA GLICADA")
+      - name: exames.codigo
+        description: >
+          Código descritivo do exame (ex.: "HGL" → exame de hemoglobina glicada)
+      - name: exames.data_assinatura
+        description: Data em que o exame foi assinado pelo médico
+      - name: laudo_url
+        description: URL do laudo em PDF
+      - name: medico_solicitante
+        description: Nome do(a) médico(a) que solicitou o exame ao paciente
+      - name: datahora_pedido
+        description: Data/hora da solicitação do exame
+      - name: _ultima_datahora_assinatura
+        description: >
+          Data/hora mais recente de assinatura de exame; usado para ordenar laudos
+          de um paciente por atividade mais recente.
+      - name: cpf_particao
+        description: Particionamento pelo CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+
+  - name: mart_historico_clinico__contrarreferencia
+    description: Contrarreferências
+    columns:
+
+      - name: source_id
+        description: Identificador do evento na fonte
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: id_hci
+        description: Fingerprint determinístico para o atendimento.
+      - name: paciente
+        description: Informações sobre o paciente
+      - name: paciente.nome
+        description: Nome do paciente
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: paciente.nome_social
+        description: Nome social do paciente, se existir
+        policy_tags:
+          - '{{ var("TAG_NOME") }}'
+      - name: paciente.cpf
+        description: CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: paciente.cns
+        description: CNS do paciente
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+      - name: paciente.data_nascimento
+        description: Data de nascimento do paciente
+        data_type: date
+        policy_tags:
+          - '{{ var("TAG_DATA_NASCIMENTO") }}'
+      - name: paciente.telefone
+        description: Número de telefone do paciente
+        policy_tags:
+          - '{{ var ("TAG_TELEFONE") }}'
+      - name: paciente.uf_naturalidade
+        description: UF de nascimento do paciente
+      - name: paciente.municipio_naturalidade
+        description: Município de nascimento do paciente
+      - name: paciente.uf_residencia
+        description: UF de residência do paciente
+      - name: paciente.municipio_residencia
+        description: Município de residência do paciente
+      - name: estabelecimento
+        description: Informações sobre a unidade de saúde onde ocorreu o atendimento
+      - name: estabelecimento.id_cnes
+        description: Identificador CNES da unidade
+      - name: estabelecimento.nome
+        description: Nome da unidade
+      - name: estabelecimento.uf
+        description: UF onde se localiza a unidade
+      - name: estabelecimento.municipio
+        description: Município onde se localiza a unidade
+      - name: profissional
+        description: Informações sobre o profissional responsável
+      - name: profissional.nome
+        description: Nome do profissional responsável
+      - name: profissional.cpf
+        description: CPF do profissional responsável
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'
+      - name: profissional.cns
+        description: CNS do profissional responsável
+        policy_tags:
+          - '{{ var("TAG_CNS") }}'
+      - name: profissional.cargo
+        description: Cargo do profissional responsável
+      - name: contrarreferencia
+        description: Informações sobre o documento da contrarreferência em si
+      - name: contrarreferencia.id_documento
+        description: Identificador do documento na fonte
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: contrarreferencia.numero
+        description: Número identificador da contrarreferência
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: contrarreferencia.datahora
+        description: Data e hora de emissão da contrarreferência
+      - name: contrarreferencia.pdf_uri
+        description: URI do Google Cloud Storage (gs://) contendo a contrarreferência em PDF
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao
+        description: Avaliação do profissional responsável
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.motivo
+        description: ""  # (campo parece vir sempre nulo)
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.impressao
+        description: ""  # (campo parece vir sempre nulo)
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.resultados
+        description: ""  # (campo parece vir sempre nulo)
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.conduta
+        description: Conduta descrita pelo profissional responsável
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.seguimento
+        description: Seguimento à conduta descrito pelo profissional responsável
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.resumo
+        description: >
+          Resumo da avaliação; contém HDA, medicamentos em uso e hipótese diagnóstica
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.historia_doenca_atual
+        description: História da Doença Atual (HDA); seção de 'resumo'
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.medicamentos_em_uso
+        description: Medicamentos em uso; seção de 'resumo'
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.hipotese_diagnostica
+        description: Hipótese diagnóstica; seção de 'resumo'
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: avaliacao.encaminhamento
+        description: "" # ?
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: diagnostico
+        description: Informações sobre o diagnóstico principal
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: diagnostico.cid
+        description: CID do diagnóstico principal
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: diagnostico.descricao
+        description: Descrição do diagnóstico principal
+        policy_tags:
+          - '{{ var ("TAG_DADO_CLINICO") }}'
+      - name: flag_problema
+        description: "" # ?
+      - name: flag_motivo_coincide
+        description: "" # ?
+      - name: data_particao
+        description: >
+          Data da contrarreferência, usada em camadas menos refinadas para particionamento
+      - name: cpf_particao
+        description: Particionamento pelo CPF do paciente
+        policy_tags:
+          - '{{ var("TAG_CPF") }}'

@@ -1,0 +1,877 @@
+# Name your project! Project names should contain only lowercase characters
+# and underscores. A good package name should reflect your organization's
+# name or the intended use of these models
+name: "rj_sms"
+version: "1.0.0"
+config-version: 2
+
+# This setting configures which "profile" dbt uses for this project.
+profile: "sms"
+
+# These configurations specify where dbt should look for different types of files.
+# The `source-paths` config, for example, states that models in this project can be
+# found in the "models/" directory. You probably won't need to change these!
+model-paths: ["models"]
+analysis-paths: ["analysis"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+target-path: "target" # directory which will store compiled SQL files
+clean-targets: # directories to be removed by `dbt clean`
+  - "target"
+  - "dbt_modules"
+
+# Defining variables
+vars:
+  # Internal variables
+  DBT_USER: "{{ env_var('DBT_USER', 'dev_fantasma') }}"
+  
+  # Policy tags
+  #  Free access:
+  TAG_PUBLICO_CPF: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/5699415336157868746'
+  TAG_PUBLICO_CNS: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/7387549036507982422'
+  TAG_PUBLICO_CONSELHO_DE_CLASSE: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/8947953670499880401'
+  TAG_PUBLICO_DATA_NASCIMENTO: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/1089827107712020997'
+  TAG_PUBLICO_IDENTIDADE: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/3743809371220572672'
+  TAG_PUBLICO_IDENTIFICADOR_SISTEMA: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/1209329132431056760'
+  TAG_PUBLICO_NOME: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/9103837752323511776'
+  TAG_PUBLICO_NOME_MAE: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/8561050879085790814'
+  TAG_PUBLICO_NOME_PAI: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/4885144376878158083'
+  TAG_PUBLICO_OUTRO_DOC: 'projects/rj-sms/locations/us/taxonomies/6081774755636705541/policyTags/4320640137660013492'
+
+  #  Restricted access:
+  #   Identifiers
+  TAG_CPF: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/1689671600024046932'
+  TAG_CNS: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/2901367901059215729'
+  TAG_CONSELHO_DE_CLASSE: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/4548538642730180995'
+  TAG_DATA_NASCIMENTO: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/8548247179869888647'
+  #TAG_DATA_OBITO: ''
+  TAG_IDENTIDADE: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/8263914069321607924'
+  TAG_IDENTIFICADOR_SISTEMA: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/7573439620630018034'
+  TAG_NOME: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/5037947799828588462'
+  TAG_NOME_MAE: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/3410377021813867603'
+  TAG_NOME_PAI: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/1248058356263361805'
+  TAG_OUTRO_DOC: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/7339421740683120932'
+  #   Other information:
+  TAG_CONTATO: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/5804345045751147976'
+  TAG_EMAIL: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/1724143358615811174'
+  TAG_ENDERECO: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/3861022792882552590'
+  TAG_TELEFONE: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/6732688311195525698'
+  TAG_DADO_BANCARIO: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/4150697899389182141'
+  TAG_DADO_CLINICO: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/7155330191381842548'
+  TAG_DADO_ESTOQUE: 'projects/rj-sms/locations/us/taxonomies/8150870731612680617/policyTags/9217789274924499899'
+
+  # BigQuery Monitoring
+  bq_region: 'us'
+  input_gcp_projects: ['rj-sms-dev', 'rj-sms', 'rj-sms-sandbox']
+  enable_gcp_bigquery_audit_logs: false
+  gcp_bigquery_audit_logs_storage_project: 'rj-sms'
+  gcp_bigquery_audit_logs_dataset: 'gerenciamento__custos'
+  gcp_bigquery_audit_logs_table: 'dbt_bigquery_audit_logs'
+
+query-comment:
+  comment: '{{ dbt_bigquery_monitoring.get_query_comment(node) }}'
+  job-label: True # Use query comment JSON as job labels
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+models:
+  +persist_docs:
+    relation: true
+    columns: true
+  elementary:
+    +schema: "gerenciamento__dbt_elementary"
+    +enabled: "{{ target.name in ['prod'] }}"
+  dbt_bigquery_monitoring:
+    +schema: "gerenciamento__dbt_bigquery_monitoring"
+  rj_sms:
+    # all models should have unique and not null
+    +required_tests: { "unique.*|not_null": 2 }
+    +required_docs: true
+    raw:
+      +materialized: table
+      +tags: "raw"
+      iplan:
+        +schema: brutos_iplanrio
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      aplicacao_hci:
+        +schema: brutos_aplicacao_hci
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      cnes_web:
+        +schema: brutos_cnes_web
+        +tags: "weekly"
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: nao
+      cnes_ftp:
+        +schema: brutos_cnes_ftp
+        +tags: "weekly"
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: nao
+      datario:
+        +schema: datario_dados_mestres
+        +tags: ["monthly", "datario"]
+        +labels:
+          dado_publico: sim
+          dado_pessoal: nao
+          dado_sensivel: nao
+      gal:
+        +schema: brutos_gal
+        +tags: ["daily", "gal"]
+        +labels:
+          dominio: subpav
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      sipni:
+        +schema: brutos_sipni
+        +tags: ["sipni"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+
+      gdb_cnes:
+        +schema: brutos_gdb_cnes
+        +tags: ["weekly", "gdb_cnes"]
+        +meta: {"owner": "avellar"}
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: sim
+      gdb_sih:
+        +schema: brutos_gdb_sih
+        +tags: ["gdb_sih"]  # TODO: weekly
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: sim
+      gdb_sia:
+        +schema: brutos_gdb_sia
+        +tags: ["gdb_sia"]  # TODO: weekly
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: sim
+
+      geo_pgeo3:
+        +schema: brutos_geo_pgeo3
+        +tags: ["weekly", "subgeral", "monitora_reg", "cnes_subgeral"]
+        +labels:
+          dado_publico: sim
+          dado_pessoal: nao
+          dado_sensivel: nao
+          dominio: subgeral
+      minhasaude_mongodb:
+        +schema: brutos_minhasaude_mongodb
+        +tags: ["daily", "minhasaude", "subgeral"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: subgeral
+      ser_metabase:
+        +schema: brutos_ser_metabase
+        +tags: ["daily", "ser", "subgeral"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: subgeral
+      ergon:
+        +schema: brutos_ergon
+        +tags: ["daily", "ergon"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      prefect:
+        +schema: brutos_prefect
+        +tags: ["daily", "prefect"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: nao
+          dado_sensivel: nao
+      datasus:
+        +schema: brutos_datasus
+        +tags: ["weekly", "subgeral"]
+        +labels:
+          dado_publico: sim
+          dado_pessoal: sim
+          dado_sensivel: nao
+          dominio: subgeral
+
+      ##################
+      ## CDI
+      # Planilhas
+      cdi:
+        +schema: brutos_cdi
+        +tags: ["daily", "cdi", "cdi-4hours"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      # VPS
+      diario_oficial:
+        +schema: brutos_diario_oficial
+        +tags: ["daily"]
+        +meta: {"owner": "avellar"}
+        +labels:
+          dado_publico: sim
+          dado_pessoal: nao
+          dado_sensivel: nao
+
+      monitoramento:
+        +schema: gerenciamento__historico_clinico__logs
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: nao
+      estoque_central_tpc:
+        +schema: brutos_estoque_central_tpc
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: nao
+          dado_sensivel: nao
+          dominio: estoque
+      sisvisa:
+        +enabled: false
+        +schema: brutos_sisvisa
+        +tags: ["daily", "sisvisa", "ivisa"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      historico_clinico_integrado:
+        +schema: brutos_historico_clinico_integrado
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      plataforma_smsrio:
+        +schema: brutos_plataforma_smsrio
+        +tags: ["smsrio", "daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      plataforma_subpav:
+        +schema: brutos_plataforma_subpav
+        +tags: ["plataforma_subpav", "daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      plataforma_clickup:
+        +schema: brutos_plataforma_clickup
+        +tags: ["daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      informes_vitacare:
+        +schema: brutos_informes_vitacare
+        +tags: ["vitacare", "weekly"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: subpav
+
+      ##################
+      ## Prontuários
+      prontuario_vitacare:
+        +schema: brutos_prontuario_vitacare
+        +tags: ["vitacare"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_vitacare_api:
+        +schema: brutos_prontuario_vitacare_api
+        +tags: ["vitacare", "daily", "vitacare_api"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_vitacare_api_centralizadora:
+        +schema: brutos_prontuario_vitacare_api_centralizadora
+        +tags: ["vitacare", "daily", "vitacare_api_centralizadora"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_vitacare_historico:
+        +schema: brutos_prontuario_vitacare_historico
+        +tags: ["vitacare", "vitacare_historico"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_vitai:
+        +schema: brutos_prontuario_vitai
+        +tags: ["vitai","daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_vitai_api:
+        +schema: brutos_prontuario_vitai_api
+        +tags: ["vitai", "daily", "vitai_api"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_carioca_saude_mental:
+        +schema: brutos_prontuario_carioca_saude_mental
+        +tags: ["pcsm", "saude mental", "daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+      prontuario_sarah:
+        +schema: brutos_prontuario_sarah
+        +tags: ["sarah", "daily"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+          dominio: historico_clinico
+
+      bcadastro:
+        +schema: brutos_bcadastro
+        +tags: "bcadastro"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      osinfo:
+        +schema: brutos_osinfo
+        +tags: "daily"
+        +labels:
+          dado_publico: nao
+          dado_pessoal: nao
+          dado_sensivel: nao
+      sheets:
+        +schema: brutos_sheets
+        +labels:
+          dado_publico: nao
+          dado_pessoal: nao
+          dado_sensivel: nao
+          dominio: subgeral
+      centralderegulacao_mysql:
+        +schema: brutos_centralderegulacao_mysql
+        +tags: ["daily", "subgeral", "minhasaude"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: nao
+          dado_sensivel: nao
+          dominio: subgeral
+
+      ##################
+      ## Sistemas
+      sih:
+        +schema: brutos_sih
+        +tags: ["sih", "subgeral"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      sim:
+        +schema: brutos_sim
+        +tags: ["sim", "subgeral"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      sisreg_api:
+        +schema: brutos_sisreg_api
+        +tags: ["daily", "subgeral", "sisreg", "sisreg_reports"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      sisreg_api_log:
+        +schema: brutos_sisreg_api_log
+        +tags: ["daily", "subgeral", "sisreg", "sisreg_reports"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      siscan_web:
+        +schema: brutos_sisreg_api_log
+        +tags: ["daily", "subgeral", "siscan"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+
+      ##################
+      ## Exames
+      exames_laboratoriais:
+        +schema: brutos_exames_laboratoriais
+        +tags: ["exames_laboratoriais"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+      medilab:
+        +schema: brutos_medilab
+        +tags: ["daily", "medilab"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+
+      projeto_c34:
+        +schema: projeto_c34
+        +tags: ["weekly", "subgeral", "projeto_c34"]
+        +labels:
+          dado_publico: nao
+          dado_pessoal: sim
+          dado_sensivel: sim
+
+
+    ##########################################################################
+    ##########################################################################
+    intermediate:
+      +materialized: ephemeral
+      iplanrio:
+        whatsapp:
+          +materialized: table
+          +tags: ["daily", "iplanrio", "whatsapp"]
+          +schema: intermediario_whatsapp
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: iplanrio
+      ivisa:
+          +enabled: false
+          +schema: intermediario_empreendimentos_cariocas
+          +tags: ["daily", "ivisa", "empreendimentos"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: ivisa
+      subpav:
+          +schema: intermediario_plataforma_subpav
+          +tags: ["daily", "subpav", "cegonha"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subpav
+      cie:
+          +tags: ["cie", "daily"]
+          +schema: intermediario_cie
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+      dit:
+        historico_clinico:
+          +tags: ["hci", "daily"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: historico_clinico
+          paciente:
+            +tags: ["paciente"]
+          exames:
+            +tags: ['exames_laboratoriais']
+        cadastro:
+          +tags: ["cadastro", "weekly"]
+          +schema: intermediario_cadastro
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+        cdi:
+          +tags: ["cdi", "daily", "cdi-4hours"]
+          +schema: intermediario_cdi
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+        monitoramento:
+          +tags: "daily"
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+        gdb_cnes:
+          +tags: ["weekly", "gdb_cnes"]
+          +schema: intermediario_gdb_cnes
+          +labels:
+            dado_publico: sim
+            dado_pessoal: sim
+            dado_sensivel: sim
+
+
+    ##########################################################################
+    ##########################################################################
+    marts:
+      +materialized: table
+      core:
+        +tags: "core"
+        dimensions:
+          +schema: saude_dados_mestres
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+          rio:
+            +schema: saude_rio
+            +tags: ["weekly", "saude_rio", "subgeral", "cnes_subgeral", "monitora_reg"]
+            +labels:
+              dado_publico: sim
+              dado_pessoal: sim
+              dado_sensivel: nao
+              dominio: subgeral
+        facts:
+          estoque:
+            +schema: saude_estoque
+            +tags: "daily"
+            +labels:
+              dado_publico: nao
+              dado_pessoal: sim
+              dado_sensivel: sim
+              dominio: estoque
+        linkage:
+          +schema: saude_linkage
+          +tags: ["weekly", "linkage"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: nao
+        hackathon_coppe:
+          +schema: hackathon_coppe
+          +tags: ["hackathon_coppe"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+      cie:
+        alerta_doencas:
+          +schema: projeto_alerta_doencas
+          +tags: ["daily", "cie", "alerta_doencas"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: cie
+        dashboard:
+          +schema: projeto_cie_dashboard
+          +tags: ["cie", "dashboard", "daily"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: nao
+            dominio: cie
+        vacinacao:
+          +schema: projeto_cie_vacinacao
+          +tags: ["cie", "daily"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: cie
+      dit:
+        dashboard_ingestao_vitacare:
+          +schema: relatorio_ingestao_vitacare
+          +tags: ["daily", "vitacare", "ingestao"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+        dashboard_transmissao_ministerio_da_saude:
+          +schema: dashboard_transmissao_ministerio_da_saude
+          +tags: ["ms"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+        dashboard_datalake:
+          +schema: dashboard_datalake
+          +tags: ["daily", "datalake"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+        dashboard_qualidade_dados:
+          +schema: dashboard_qualidade_dados
+          +tags: ["daily", "qualidade_dados"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+        dashboard_infraestrutura:
+          +schema: dashboard_infraestrutura
+          +tags: ["daily", "infraestrutura"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: nao
+            dado_sensivel: nao
+        dengue:
+          +schema: projeto_dengue
+          +tags: "daily"
+        estoque:
+          +schema: projeto_estoque
+          +tags: ["daily", "estoque"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: estoque
+        cdi:
+          +schema: projeto_cdi
+          +tags: ["daily", "cdi", "cdi-4hours"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+        gerenciamento:
+          +tags: "daily"
+        historico_clinico:
+          +tags: ["daily", "hci"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: historico_clinico
+        historico_clinico_app:
+          +tags: ["daily", "hci_app"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: historico_clinico_app
+        historico_clinico_app_treinamento:
+          +tags: ["hci_app_treinamento","daily"]
+          +schema: app_historico_clinico_treinamento
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: historico_clinico_app
+        informes_seguranca:
+          +tags: ["informes-seguranca", "daily"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+      ivisa:
+        empreendimentos_cariocas:
+          +enabled: false
+          +schema: projeto_empreendimentos_cariocas
+          +tags: ["daily", "ivisa", "empreendimentos"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: ivisa
+
+      minha_saude:
+        exames:
+          +schema: projeto_minha_saude
+          +tags: ["daily", "minha_saude", "exames"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+
+      iplanrio:
+        whatsapp:
+          +tags: ["daily", "iplanrio", "whatsapp"]
+          +schema: projeto_whatsapp
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: iplanrio
+        pic:
+          +schema: projeto_pic
+          +tags: ["daily", "iplanrio", "pic"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: iplanrio
+        paciente:
+          +schema: projeto_paciente
+          +tags: ["daily", "iplanrio", "paciente"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: iplanrio
+      subpav:
+        dashboard_gestacoes:
+          +schema: projeto_gestacoes
+          +tags: ["daily", "subpav", "gestacoes"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: gestacoes
+        projeto_linhas_cuidado:
+          +schema: projeto_linhas_cuidado
+          +tags: ["daily", "subpav", "linhas_cuidado"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+        farmacia:
+          +schema: projeto_subpav
+          +tags: ["daily", "subpav"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subpav
+        sinanrio:
+          +schema: projeto_sinanrio
+          +tags: ["daily", "subpav", "sinanrio"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subpav
+        indicadores_paciente:
+          +schema: projeto_subpav
+          +tags: ["weekly", "subpav"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subpav
+        #pic
+      subgeral:
+        cnes_subgeral:
+          +schema: projeto_cnes_subgeral
+          +tags: ["weekly", "subgeral", "cnes"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subgeral
+
+        monitora_reg:
+          +schema: projeto_monitora_reg
+          +tags: ["weekly", "subgeral", "monitora_reg"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: nao
+            dominio: subgeral
+
+        sisreg:
+            +schema: saude_sisreg
+            +tags: ["daily", "cnes", "sisreg", "subgeral", "monitora_reg"]
+            +labels:
+              dado_publico: nao
+              dado_pessoal: sim
+              dado_sensivel: sim
+              dominio: subgeral
+        
+        teleconsulta:
+          +schema: projeto_teleconsulta
+          +tags: ["weekly", "subgeral", "teleconsulta"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subgeral
+
+        nps:
+          +schema: projeto_nps
+          +tags: ["weekly", "subgeral", "nps"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: nao
+            dominio: subgeral
+
+        reports:
+          sisreg_reports:
+            +schema: projeto_sisreg_reports
+            +tags: ["weekly", "subgeral", "sisreg", "subgeral_reports"]
+            +labels:
+              dado_publico: nao
+              dado_pessoal: sim
+              dado_sensivel: nao
+              dominio: subgeral
+
+          prontuarios_reports:
+            +schema: projeto_prontuarios_reports
+            +tags: ["daily", "subgeral", "prontuarios_reports"]
+            +labels:
+              dado_publico: nao
+              dado_pessoal: sim
+              dado_sensivel: nao
+
+          indicadores_aps_reports:
+            +schema: projeto_aps_reports
+            +tags: ["weekly", "subgeral", "indicadores_aps"]
+            +labels:
+              dado_publico: nao
+              dado_pessoal: sim
+              dado_sensivel: nao
+              dominio: subgeral
+
+        tempo_medio_espera:
+          +schema: projeto_sisreg_tme
+          +tags: ["weekly", "subgeral", "sisreg", "sisreg_tme"]
+          +labels:
+            dado_publico: sim
+            dado_pessoal: nao
+            dado_sensivel: nao
+
+        monitora_cancer:
+          +schema: projeto_monitora_cancer
+          +tags: ["daily", "subgeral", "monitora_cancer"]
+          +labels:
+            dado_publico: nao
+            dado_pessoal: sim
+            dado_sensivel: sim
+            dominio: subgeral
+
+data_tests:
+  rj_sms:
+    +severity: error
+    +store_failures: true
+    +schema: gerenciamento__dbt_test_audit
+
+seeds:
+  rj_sms:
+
+flags:
+  require_explicit_package_overrides_for_builtin_materializations: False
+  source_freshness_run_project_hooks: True

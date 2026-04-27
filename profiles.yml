@@ -1,0 +1,35 @@
+sms:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: rj-sms-dev
+      dataset: gerenciamento__dbt
+      location: US
+      threads: 10
+      keyfile: /tmp/credentials.json
+    prod:
+      type: bigquery
+      method: service-account
+      project: rj-sms
+      dataset: gerenciamento__dbt
+      location: US
+      threads: 10
+      keyfile: /tmp/credentials.json
+    ci:
+      type: bigquery
+      method: service-account
+      project: rj-sms-dev
+      dataset: gerenciamento__dbt
+      location: US
+      threads: 10
+      keyfile: /tmp/credentials.json
+    sandbox:
+      type: bigquery
+      method: service-account
+      project: rj-sms-sandbox
+      dataset: gerenciamento__dbt
+      location: US
+      threads: 10
+      keyfile: /tmp/credentials.json

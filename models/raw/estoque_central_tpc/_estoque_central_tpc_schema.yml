@@ -1,0 +1,48 @@
+version: 2
+models:
+  - name: raw_estoque_central_tpc__estoque_posicao
+    description: >
+      Posição diária dos estoques de medicamentos e insumos no estoque central
+      gerenciado pela empresa TPC
+    columns:
+      - name: id_lote
+        description: Identificador do lote do medicamento/insumo
+      - name: id_material
+        description: Identificador do medicamento/insumo
+      - name: estoque_secao
+        description: Local dentro da unidade de saúde onde está armazenado o
+          medicamento/insumo
+      - name: material_descricao
+        description: Descrição do medicamento/insumo
+
+      - name: material_unidade
+        description: Unidade de estocagem do medicamento/insumo
+      - name: lote_data_vencimento
+        description: Data de vecimento do lote
+      - name: material_quantidade
+        description: Quantidade disponível do medicamento/insumo
+        data_tests:
+          - dbt_expectations.expect_column_values_to_not_be_null:
+              name: raw_estoque_central_tpc__estoque_posicao__material_quantidade__not_null
+              config:
+                severity: error
+                where: "data_particao = current_date('America/Sao_Paulo')"
+      - name: material_valor_unitario
+        description: Valor em reais de uma unidade do medicamento/insumo
+      - name: material_valor_total
+        description: Valor em reais somando todas as unidades disponíveis do
+          medicamento/insumo
+        data_tests:
+          - dbt_expectations.expect_column_sum_to_be_between:
+              name: raw_estoque_central_tpc__estoque_posicao__material_valor_total__between
+              min_value: 58000000 # TODO: Antes era 60000000. De onde vieram esses valores?
+              max_value: 110000000 # TODO: De onde vieram esses valores?
+              config:
+                severity: warn
+                where: "data_particao = current_date('America/Sao_Paulo')"
+      - name: data_particao
+        description: Data de referencia da posição do estoque
+      - name: data_snapshot
+        description: Momento no qual foi feito o snapshot do registro
+      - name: data_carga
+        description: Momento (GMT-3) no qual foi feito o download do dataset
